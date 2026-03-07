@@ -52,16 +52,20 @@ php artisan key:generate
 php artisan migrate
 ```
 
-6. (Opcional) Crie um usuario admin padrao:
+6. (Opcional) Crie os usuarios padrao (admin e funcionario):
 
 ```bash
-php artisan db:seed --class=AdminUserSeeder
+php artisan db:seed
 ```
 
-Credenciais criadas pelo seeder:
+Credenciais criadas pelos seeders:
 
-- Email: `admin@example.com`
-- Senha: `senha_admin`
+- Admin
+  - Email: `admin@example.com`
+  - Senha: `senha_admin`
+- Funcionario
+  - Email: `funcionario@example.com`
+  - Senha: `senha_funcionario`
 
 7. Instale as dependencias front-end:
 
@@ -92,5 +96,6 @@ npm run build
 
 ## Observacoes
 
-- O `DatabaseSeeder` nao chama o `AdminUserSeeder` automaticamente.
+- O `DatabaseSeeder` chama `AdminUserSeeder` e `FuncionarioUserSeeder`.
+- Novos usuarios registrados pela tela de cadastro recebem `tipo_usuario = funcionario`.
 - Tipos e centros de custo devem ser cadastrados pela interface antes dos primeiros lancamentos.
