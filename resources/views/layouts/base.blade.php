@@ -72,13 +72,13 @@
         </nav>        
         {{-- /MENU --}}
 
-        {{-- CONTEÚDO --}}
+        {{-- CONTEUDO --}}
         <div class="row mt-2 mb-4">
             @yield('conteudo')
         </div>
-        {{-- CONTEÚDO --}}
-        {{-- RODAPÉ --}}        
-        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+        {{-- CONTEUDO --}}
+
+        <!-- <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
             <div class="col-md-12 d-flex align-items-center">
                 <span class="mb-3 mb-md-0 text-muted">© Todos os direitos reservados {{ date('Y-m-d') }}</span>
                 &nbsp;
@@ -86,8 +86,7 @@
                     - <strong>Vitor Grisolia</strong>
                 </a>
             </div>
-        </footer>
-        {{-- RODAPÉ --}}
+        </footer> -->
     </div>    
 </body>
 @yield('script')
