@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 #Controllers
 use App\Http\Controllers\CentroCustoController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LancamentoController;
 use App\Http\Controllers\TipoController;
 
