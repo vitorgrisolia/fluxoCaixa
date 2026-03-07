@@ -13,9 +13,15 @@
         </div>
     @endif
 
+    @if (session('danger'))
+        <div class="alert alert-danger">
+            {{ session('danger') }}
+        </div>
+    @endif
+
     @if ($errors->any())
         <div class="alert alert-danger">
-            <strong>Erro ao cadastrar:</strong>
+            <strong>Erro ao processar:</strong>
             <ul class="mb-0 mt-2">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -182,9 +188,21 @@
                                 </span>
                             </td>
                             <td>
-                                <a href="{{ route('usuario.edit', ['id' => $usuario->id_user]) }}" class="btn btn-sm btn-outline-primary">
-                                    Editar
-                                </a>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ route('usuario.edit', ['id' => $usuario->id_user]) }}" class="btn btn-sm btn-outline-primary">
+                                        Editar
+                                    </a>
+                                    <form
+                                        action="{{ route('usuario.delete', ['id' => $usuario->id_user]) }}"
+                                        method="post"
+                                        onsubmit="return confirm('Deseja realmente excluir este usuario?');"
+                                    >
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            Excluir
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty

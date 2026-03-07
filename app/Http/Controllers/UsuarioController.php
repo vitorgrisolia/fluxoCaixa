@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
@@ -73,5 +74,30 @@ class UsuarioController extends Controller
 
         return redirect()->route('usuario.edit', ['id' => $usuario->id_user])
             ->with('success', 'Usuario atualizado com sucesso.');
+    }
+
+    public function destroy(int $id)
+    {
+        $usuario = User::findOrFail($id);
+        $usuarioLogado = Auth::user();
+
+        if ($usuario->id_user === $usuarioLogado->id_user) {
+            return redirect()->route('usuario.index')
+                ->with('danger', 'Voce nao pode excluir o proprio usuario logado.');
+        }
+
+        if ($usuario->tipo_usuario === 'admin') {
+            $totalAdmins = User::where('tipo_usuario', 'admin')->count();
+
+            if ($totalAdmins <= 1) {
+                return redirect()->route('usuario.index')
+                    ->with('danger', 'Nao e possivel excluir o ultimo usuario admin.');
+            }
+        }
+
+        $usuario->delete();
+
+        return redirect()->route('usuario.index')
+            ->with('success', 'Usuario excluido com sucesso.');
     }
 }

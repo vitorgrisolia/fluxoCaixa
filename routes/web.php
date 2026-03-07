@@ -64,6 +64,7 @@ Route::prefix('usuario')->middleware(['auth', 'admin'])->controller(UsuarioContr
     Route::get('/editar/{id}', 'edit')->      name('usuario.edit');
     Route::post('/cadastrar', 'store')->      name('usuario.store');
     Route::post('/atualizar/{id}', 'update')->name('usuario.update');
+    Route::post('/deletar/{id}', 'destroy')-> name('usuario.delete');
 });
 
 
