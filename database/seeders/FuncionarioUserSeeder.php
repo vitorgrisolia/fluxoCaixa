@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-class AdminUserSeeder extends Seeder
+class FuncionarioUserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,11 +16,11 @@ class AdminUserSeeder extends Seeder
     public function run()
     {
         DB::table('users')->updateOrInsert(
-            ['email' => 'admin@example.com'],
+            ['email' => 'funcionario@example.com'],
             [
-                'nome' => 'Admin',
-                'password' => Hash::make('senha_admin'),
-                'tipo_usuario' => 'admin',
+                'nome' => 'Funcionario',
+                'password' => Hash::make('senha_funcionario'),
+                'tipo_usuario' => 'funcionario',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
