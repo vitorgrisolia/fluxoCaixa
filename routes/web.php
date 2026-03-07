@@ -61,7 +61,9 @@ Route::prefix('usuario')->middleware(['auth', 'admin'])->controller(UsuarioContr
 ->group(function ()
 {
     Route::get('/', 'index')->                name('usuario.index');
+    Route::get('/editar/{id}', 'edit')->      name('usuario.edit');
     Route::post('/cadastrar', 'store')->      name('usuario.store');
+    Route::post('/atualizar/{id}', 'update')->name('usuario.update');
 });
 
 
