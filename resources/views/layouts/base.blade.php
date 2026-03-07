@@ -56,6 +56,12 @@
                             <i class="bi bi-arrow-down-up"></i>
                             Tipos
                         </a>
+                        @if(Auth::user()->tipo_usuario === 'admin')
+                            <a class="nav-link" href="{{ route('usuario.index') }}">
+                                <i class="bi bi-people-fill"></i>
+                                Usuarios
+                            </a>
+                        @endif
                         <a class="nav-link" href="{{ route('logout') }}">
                             <i class="bi bi-box-arrow-right"></i>
                             Sair

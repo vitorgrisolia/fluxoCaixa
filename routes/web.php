@@ -6,6 +6,7 @@ use App\Http\Controllers\CentroCustoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LancamentoController;
 use App\Http\Controllers\TipoController;
+use App\Http\Controllers\UsuarioController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +50,18 @@ Route::prefix('home')->middleware(['auth'])->controller(HomeController::class)
 {
     Route::get('/', 'index')->                name('home.index');
     Route::get('/novo', 'create')->           name('home.create');
+});
+
+/*
+|--------------------------------------------------------------------------
+| USUARIOS (ADMIN)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('usuario')->middleware(['auth', 'admin'])->controller(UsuarioController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->                name('usuario.index');
+    Route::post('/cadastrar', 'store')->      name('usuario.store');
 });
 
 
