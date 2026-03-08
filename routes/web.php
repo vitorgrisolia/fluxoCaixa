@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CentroCustoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LancamentoController;
+use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\TipoController;
 use App\Http\Controllers\UsuarioController;
 
@@ -65,6 +66,22 @@ Route::prefix('usuario')->middleware(['auth', 'admin'])->controller(UsuarioContr
     Route::post('/cadastrar', 'store')->      name('usuario.store');
     Route::post('/atualizar/{id}', 'update')->name('usuario.update');
     Route::post('/deletar/{id}', 'destroy')-> name('usuario.delete');
+});
+
+/*
+|--------------------------------------------------------------------------
+| PRODUTOS (ADMIN)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('produto')->middleware(['auth', 'admin'])->controller(ProdutoController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->                name('produto.index');
+    Route::get('/novo', 'create')->           name('produto.create');
+    Route::get('/editar/{id}', 'edit')->      name('produto.edit');
+    Route::post('/cadastrar', 'store')->      name('produto.store');
+    Route::post('/atualizar/{id}', 'update')->name('produto.update');
+    Route::post('/deletar/{id}', 'destroy')-> name('produto.delete');
 });
 
 

@@ -61,6 +61,10 @@
                                 <i class="bi bi-people-fill"></i>
                                 Usuarios
                             </a>
+                            <a class="nav-link" href="{{ route('produto.index') }}">
+                                <i class="bi bi-box-seam"></i>
+                                Produtos
+                            </a>
                         @endif
                         <a class="nav-link" href="{{ route('logout') }}">
                             <i class="bi bi-box-arrow-right"></i>
