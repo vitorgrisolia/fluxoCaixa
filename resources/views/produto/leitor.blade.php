@@ -11,6 +11,12 @@
         Valor total para compra: <strong>R$ {{ number_format($totalCompra, 2, ',', '.') }}</strong>
     </div>
 
+    <div class="mb-3">
+        <a href="{{ route('leitor.finalizar') }}" class="btn btn-success">
+            Finalizar compra
+        </a>
+    </div>
+
     <table class="table table-striped table-border table-hover align-middle">
         <thead>
             <tr>

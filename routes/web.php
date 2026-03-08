@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 #Controllers
 use App\Http\Controllers\CentroCustoController;
+use App\Http\Controllers\CompraFuncionarioController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LancamentoController;
 use App\Http\Controllers\ProdutoController;
@@ -85,6 +86,13 @@ Route::middleware(['auth', 'funcionario'])->controller(ProdutoController::class)
 ->group(function ()
 {
     Route::get('/leitor-produtos', 'leitor')->name('leitor.produtos');
+});
+
+Route::prefix('leitor-produtos')->middleware(['auth', 'funcionario'])->controller(CompraFuncionarioController::class)
+->group(function ()
+{
+    Route::get('/finalizar-compra', 'create')->name('leitor.finalizar');
+    Route::post('/finalizar-compra', 'store')->name('leitor.finalizar.store');
 });
 
 /*

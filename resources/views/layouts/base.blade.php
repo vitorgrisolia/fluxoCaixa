@@ -73,6 +73,10 @@
                                 <i class="bi bi-upc-scan"></i>
                                 Leitor de Produtos
                             </a>
+                            <a class="nav-link" href="{{ route('leitor.finalizar') }}">
+                                <i class="bi bi-cart-check-fill"></i>
+                                Finalizar compra
+                            </a>
                         @endif
                         <a class="nav-link" href="{{ route('logout') }}">
                             <i class="bi bi-box-arrow-right"></i>

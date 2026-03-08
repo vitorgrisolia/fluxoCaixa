@@ -1,24 +1,136 @@
 # Sistema de Fluxo de Caixa
 
-Aplicacao web para controle de fluxo de caixa com foco didatico em Laravel 9.
+Aplicacao web em Laravel 9 para controle financeiro e operacao de produtos, com acessos separados por perfil (`admin` e `funcionario`).
 
-## Funcionalidades
+## Visao Geral
 
-- Cadastro de tipos.
-- Cadastro de centros de custo.
-- Cadastro de lancamentos (entrada e saida).
-- Filtro de lancamentos por descricao e periodo.
-- Autenticacao de usuarios (login, registro e recuperacao de senha).
+O sistema possui dois ambientes principais:
 
-## Tecnologias
+- Painel administrativo (perfil `admin`)
+- Painel operacional de leitura/finalizacao (perfil `funcionario`)
+
+O controle de permissao e feito por middlewares de perfil.
+
+## Perfis de Acesso
+
+### Admin
+
+Tem acesso completo a:
+
+- Dashboard e Home
+- Lancamentos (CRUD)
+- Tipos (CRUD)
+- Centro de custo (CRUD)
+- Usuarios (CRUD com tipo de usuario)
+- Produtos (CRUD com alerta de validade)
+
+### Funcionario
+
+Tem acesso somente a:
+
+- Leitor de produtos (consulta)
+- Finalizacao de compra
+
+Sem acesso a CRUD administrativo.
+
+## Modulos do Sistema
+
+### 1. Usuarios (Admin)
+
+Cadastro e manutencao de usuarios com:
+
+- Nome
+- E-mail
+- Senha
+- Tipo de usuario (`admin` ou `funcionario`)
+
+Regras de protecao implementadas:
+
+- Admin nao pode excluir o proprio usuario logado.
+- Nao e permitido excluir o ultimo usuario admin.
+
+### 2. Fluxo de Caixa (Admin)
+
+Funcionalidades:
+
+- Cadastro de tipos
+- Cadastro de centros de custo
+- Cadastro de lancamentos de entrada e saida
+- Filtro por descricao e periodo
+
+### 3. Produtos (Admin)
+
+Cadastro de produtos com os campos:
+
+- ID
+- Nome
+- Lote
+- Quantidade
+- Tipo de quantidade (`caixa` ou `unidade`)
+- Validade do produto
+- Preco de compra
+- Preco de venda
+
+Inclui:
+
+- Edicao de produto
+- Exclusao de produto
+- Alertas de vencimento na listagem:
+  - Vencido
+  - Vence hoje
+  - Vence em ate 30 dias
+  - Validade ok
+
+### 4. Leitor de Produtos (Funcionario)
+
+Tela de consulta mostrando:
+
+- Nome de cada produto
+- Quantidade de cada produto
+- Valor de cada produto (preco de compra)
+- Total por item (`preco_compra * quantidade`)
+- Valor total da compra
+
+### 5. Finalizar Compra (Funcionario)
+
+Fluxo disponivel a partir do leitor de produtos.
+
+Permite selecionar forma de pagamento padrao de mercado:
+
+- PIX
+- Dinheiro
+- Cartao de debito
+- Cartao de credito
+- Boleto
+- Vale alimentacao
+
+Opcao adicional:
+
+- `Quer dividir valor?` (`sim` ou `nao`)
+- Parcelamento de `1x` a `12x` para qualquer forma de pagamento
+- Exibicao do valor por parcela na tela
+
+Observacao:
+
+- A finalizacao gera confirmacao na interface (mensagem), sem persistencia de pedido/compra em tabela especifica.
+
+## Requisitos
 
 - PHP 8.2+
-- Laravel 9
-- MySQL (ou MariaDB)
+- Composer
+- MySQL ou MariaDB
 - Node.js + NPM
-- Vite + Tailwind CSS
 
-## Como rodar o projeto
+## Stack Tecnica
+
+- Laravel 9
+- Laravel Breeze (autenticacao)
+- Blade
+- Bootstrap 5
+- Vite
+- Tailwind (dependencia instalada via Vite)
+
+## Instalacao e Execucao
 
 1. Acesse a pasta do projeto:
 
@@ -26,76 +138,131 @@ Aplicacao web para controle de fluxo de caixa com foco didatico em Laravel 9.
 cd ProjetoFluxo_Caixa
 ```
 
-2. Instale as dependencias PHP:
+2. Instale dependencias PHP:
 
 ```bash
 composer install
 ```
 
-3. Crie o arquivo de ambiente e ajuste as credenciais do banco:
+3. Crie o arquivo de ambiente:
 
 ```bash
-copy .env.example .env
+copy .env-example .env
 ```
 
-Edite no `.env` os campos `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` e `DB_PASSWORD`.
+4. Ajuste credenciais do banco no `.env`:
 
-4. Gere a chave da aplicacao:
+- `DB_HOST`
+- `DB_PORT`
+- `DB_DATABASE`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+
+5. Gere chave da aplicacao:
 
 ```bash
 php artisan key:generate
 ```
 
-5. Execute as migrations:
+6. Rode migrations:
 
 ```bash
 php artisan migrate
 ```
 
-6. (Opcional) Crie os usuarios padrao (admin e funcionario):
+7. Popule usuarios padrao:
 
 ```bash
 php artisan db:seed
 ```
 
-Credenciais criadas pelos seeders:
-
-- Admin
-  - Email: `admin@example.com`
-  - Senha: `senha_admin`
-- Funcionario
-  - Email: `funcionario@example.com`
-  - Senha: `senha_funcionario`
-
-7. Instale as dependencias front-end:
+8. Instale dependencias front-end:
 
 ```bash
 npm install
 ```
 
-8. Em um terminal, rode o front-end:
+9. Rode o front-end:
 
 ```bash
 npm run dev
 ```
 
-9. Em outro terminal, inicie o servidor Laravel:
+10. Em outro terminal, inicie o servidor:
 
 ```bash
 php artisan serve
 ```
 
-A aplicacao ficara disponivel em `http://127.0.0.1:8000`.
+Aplicacao em:
 
-## Comandos uteis
+- `http://127.0.0.1:8000`
+
+## Credenciais Padrao
+
+### Admin
+
+- Email: `admin@example.com`
+- Senha: `senha_admin`
+
+### Funcionario
+
+- Email: `funcionario@example.com`
+- Senha: `senha_funcionario`
+
+## Redirecionamento por Perfil
+
+- Admin: redireciona para `dashboard`
+- Funcionario: redireciona para `leitor-produtos`
+
+## Principais Rotas
+
+### Funcionario
+
+- `GET /leitor-produtos`
+- `GET /leitor-produtos/finalizar-compra`
+- `POST /leitor-produtos/finalizar-compra`
+
+### Admin
+
+- `GET /dashboard`
+- `GET/POST /usuario/*`
+- `GET/POST /produto/*`
+- `GET/POST /tipo/*`
+- `GET/POST /centro-de-custo/*`
+- `GET/POST /lancamento/*`
+
+## Comandos Uteis
 
 ```bash
+php artisan route:list
+php artisan optimize:clear
 php artisan test
 npm run build
 ```
 
-## Observacoes
+## Troubleshooting
 
-- O `DatabaseSeeder` chama `AdminUserSeeder` e `FuncionarioUserSeeder`.
-- Novos usuarios registrados pela tela de cadastro recebem `tipo_usuario = funcionario`.
-- Tipos e centros de custo devem ser cadastrados pela interface antes dos primeiros lancamentos.
+### Erro "Could not open input file: artisan"
+
+Execute os comandos dentro de:
+
+`C:\Users\griso\Documents\projetos\fluxoCaixa\ProjetoFluxo_Caixa`
+
+### Erro de conexao com MySQL (HY000/2002)
+
+- Verifique se o servico MySQL esta em execucao
+- Confira `DB_HOST` e `DB_PORT`
+- Confirme que o banco existe
+
+### Erro "Unknown database"
+
+Crie o banco informado em `DB_DATABASE` antes de rodar migration.
+
+### Erro "Access denied for user"
+
+Ajuste `DB_USERNAME` e `DB_PASSWORD` no `.env` e rode:
+
+```bash
+php artisan config:clear
+```
