@@ -30,6 +30,7 @@ class ProdutoController extends Controller
     {
         $dados = $request->validate([
             'nome' => ['required', 'string', 'max:255'],
+            'lote' => ['required', 'string', 'max:100'],
             'quantidade' => ['required', 'integer', 'min:0'],
             'tipo_quantidade' => ['required', 'in:caixa,unidade'],
             'validade' => ['required', 'date'],
@@ -57,6 +58,7 @@ class ProdutoController extends Controller
 
         $dados = $request->validate([
             'nome' => ['required', 'string', 'max:255'],
+            'lote' => ['required', 'string', 'max:100'],
             'quantidade' => ['required', 'integer', 'min:0'],
             'tipo_quantidade' => ['required', 'in:caixa,unidade'],
             'validade' => ['required', 'date'],

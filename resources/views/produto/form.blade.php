@@ -48,13 +48,13 @@
         <div class="row g-3">
             @if($produto)
                 <div class="col-md-2">
-                    <label for="id_produto" class="form-label">ID</label>
+                    <label for="id_produto" class="form-label">ID:</label>
                     <input type="text" id="id_produto" class="form-control" value="{{ $produto->id_produto }}" disabled>
                 </div>
             @endif
 
-            <div class="col-md-6">
-                <label for="nome" class="form-label">Nome</label>
+            <div class="col-md-4">
+                <label for="nome" class="form-label">Nome:</label>
                 <input
                     type="text"
                     name="nome"
@@ -65,8 +65,20 @@
                 >
             </div>
 
+            <div class="col-md-3">
+                <label for="lote" class="form-label">Lote:</label>
+                <input
+                    type="text"
+                    name="lote"
+                    id="lote"
+                    class="form-control"
+                    value="{{ old('lote', $produto ? $produto->lote : '') }}"
+                    required
+                >
+            </div>
+
             <div class="col-md-2">
-                <label for="quantidade" class="form-label">Quantidade</label>
+                <label for="quantidade" class="form-label">Quantidade:</label>
                 <input
                     type="number"
                     name="quantidade"
@@ -80,9 +92,9 @@
             </div>
 
             <div class="col-md-2">
-                <label for="tipo_quantidade" class="form-label">Tipo quantidade</label>
+                <label for="tipo_quantidade" class="form-label">Tipo quantidade:</label>
                 <select name="tipo_quantidade" id="tipo_quantidade" class="form-select" required>
-                    <option value="">Selecione</option>
+                    <option value="">Selecione:</option>
                     <option value="caixa" {{ old('tipo_quantidade', $produto ? $produto->tipo_quantidade : '') === 'caixa' ? 'selected' : '' }}>
                         Caixa
                     </option>
@@ -93,7 +105,7 @@
             </div>
 
             <div class="col-md-3">
-                <label for="validade" class="form-label">Validade do produto</label>
+                <label for="validade" class="form-label">Validade do produto:</label>
                 <input
                     type="date"
                     name="validade"
@@ -105,7 +117,7 @@
             </div>
 
             <div class="col-md-3">
-                <label for="preco_compra" class="form-label">Preco de compra</label>
+                <label for="preco_compra" class="form-label">Preço de compra:</label>
                 <input
                     type="number"
                     name="preco_compra"
@@ -119,7 +131,7 @@
             </div>
 
             <div class="col-md-3">
-                <label for="preco_venda" class="form-label">Preco de venda</label>
+                <label for="preco_venda" class="form-label">Preço de venda:</label>
                 <input
                     type="number"
                     name="preco_venda"

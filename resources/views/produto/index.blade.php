@@ -36,11 +36,12 @@
             <tr>
                 <th>ID</th>
                 <th>Nome</th>
+                <th>Lote</th>
                 <th>Quantidade</th>
                 <th>Validade</th>
                 <th>Alerta de vencimento</th>
-                <th>Preco compra</th>
-                <th>Preco venda</th>
+                <th>Preço compra</th>
+                <th>Preço venda</th>
                 <th>Ação</th>
             </tr>
         </thead>
@@ -52,6 +53,7 @@
                 <tr>
                     <td>{{ $produto->id_produto }}</td>
                     <td>{{ $produto->nome }}</td>
+                    <td>{{ $produto->lote ?: '-' }}</td>
                     <td>
                         {{ $produto->quantidade }}
                         {{ $produto->tipo_quantidade === 'caixa' ? 'caixa(s)' : 'unidade(s)' }}
@@ -98,7 +100,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8" class="text-center">Nenhum produto cadastrado.</td>
+                    <td colspan="9" class="text-center">Nenhum produto cadastrado.</td>
                 </tr>
             @endforelse
         </tbody>
