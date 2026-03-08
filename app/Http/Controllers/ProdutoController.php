@@ -8,6 +8,17 @@ use Illuminate\Support\Carbon;
 
 class ProdutoController extends Controller
 {
+    public function leitor()
+    {
+        $produtos = Produto::orderBy('nome')->get();
+
+        $totalCompra = $produtos->sum(function ($produto) {
+            return $produto->preco_compra * $produto->quantidade;
+        });
+
+        return view('produto.leitor')->with(compact('produtos', 'totalCompra'));
+    }
+
     public function index()
     {
         $produtos = Produto::orderBy('validade')->orderBy('nome')->get();

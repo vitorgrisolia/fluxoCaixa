@@ -38,25 +38,28 @@
                     aria-controls="navbarNavFluxo" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+                @php
+                    $isAdmin = Auth::user()->tipo_usuario === 'admin';
+                @endphp
                 <div class="collapse navbar-collapse" id="navbarNavFluxo">
                     <div class="navbar-nav">
-                        <a class="nav-link" href="{{ route ('home.index') }}">
-                            <i class="bi bi-house-door-fill"></i>
-                            Home
-                        </a>
-                        <a class="nav-link" href="{{ route ('lancamento.index') }}">
-                            <i class="bi bi-piggy-bank-fill"></i>
-                            Lancamentos
-                        </a>
-                        <a class="nav-link" href="{{ route('centro.index') }}">
-                            <i class="bi bi-basket-fill"></i>
-                            Centro de Custo
-                        </a>                        
-                        <a class="nav-link" href="{{ route('tipo.index') }}">
-                            <i class="bi bi-arrow-down-up"></i>
-                            Tipos
-                        </a>
-                        @if(Auth::user()->tipo_usuario === 'admin')
+                        @if($isAdmin)
+                            <a class="nav-link" href="{{ route ('home.index') }}">
+                                <i class="bi bi-house-door-fill"></i>
+                                Home
+                            </a>
+                            <a class="nav-link" href="{{ route ('lancamento.index') }}">
+                                <i class="bi bi-piggy-bank-fill"></i>
+                                Lancamentos
+                            </a>
+                            <a class="nav-link" href="{{ route('centro.index') }}">
+                                <i class="bi bi-basket-fill"></i>
+                                Centro de Custo
+                            </a>                        
+                            <a class="nav-link" href="{{ route('tipo.index') }}">
+                                <i class="bi bi-arrow-down-up"></i>
+                                Tipos
+                            </a>
                             <a class="nav-link" href="{{ route('usuario.index') }}">
                                 <i class="bi bi-people-fill"></i>
                                 Usuarios
@@ -64,6 +67,11 @@
                             <a class="nav-link" href="{{ route('produto.index') }}">
                                 <i class="bi bi-box-seam"></i>
                                 Produtos
+                            </a>
+                        @else
+                            <a class="nav-link" href="{{ route('leitor.produtos') }}">
+                                <i class="bi bi-upc-scan"></i>
+                                Leitor de Produtos
                             </a>
                         @endif
                         <a class="nav-link" href="{{ route('logout') }}">

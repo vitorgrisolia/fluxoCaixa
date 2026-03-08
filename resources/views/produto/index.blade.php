@@ -25,9 +25,15 @@
         </div>
     @endif
 
-    <a href="{{ route('produto.create') }}" class="btn btn-dark">
-        Novo produto
-    </a>
+    @php
+        $isAdmin = Auth::user()->tipo_usuario === 'admin';
+    @endphp
+
+    @if ($isAdmin)
+        <a href="{{ route('produto.create') }}" class="btn btn-dark">
+            Novo produto
+        </a>
+    @endif
 
     <hr>
 
@@ -40,9 +46,11 @@
                 <th>Quantidade</th>
                 <th>Validade</th>
                 <th>Alerta de vencimento</th>
-                <th>Preço compra</th>
-                <th>Preço venda</th>
-                <th>Ação</th>
+                <th>Preco compra</th>
+                <th>Preco venda</th>
+                @if($isAdmin)
+                    <th>Acoes</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -80,27 +88,29 @@
                     </td>
                     <td>R$ {{ number_format($produto->preco_compra, 2, ',', '.') }}</td>
                     <td>R$ {{ number_format($produto->preco_venda, 2, ',', '.') }}</td>
-                    <td>
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('produto.edit', ['id' => $produto->id_produto]) }}" class="btn btn-sm btn-outline-primary">
-                                Editar
-                            </a>
-                            <form
-                                action="{{ route('produto.delete', ['id' => $produto->id_produto]) }}"
-                                method="post"
-                                onsubmit="return confirm('Deseja realmente excluir este produto?');"
-                            >
-                                @csrf
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    Excluir
-                                </button>
-                            </form>
-                        </div>
-                    </td>
+                    @if($isAdmin)
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('produto.edit', ['id' => $produto->id_produto]) }}" class="btn btn-sm btn-outline-primary">
+                                    Editar
+                                </a>
+                                <form
+                                    action="{{ route('produto.delete', ['id' => $produto->id_produto]) }}"
+                                    method="post"
+                                    onsubmit="return confirm('Deseja realmente excluir este produto?');"
+                                >
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Excluir
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    @endif
                 </tr>
             @empty
                 <tr>
-                    <td colspan="9" class="text-center">Nenhum produto cadastrado.</td>
+                    <td colspan="{{ $isAdmin ? 9 : 8 }}" class="text-center">Nenhum produto cadastrado.</td>
                 </tr>
             @endforelse
         </tbody>
