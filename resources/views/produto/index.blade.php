@@ -41,7 +41,7 @@
                 <th>Alerta de vencimento</th>
                 <th>Preco compra</th>
                 <th>Preco venda</th>
-                <th>Acoes</th>
+                <th>Ação</th>
             </tr>
         </thead>
         <tbody>
@@ -98,7 +98,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8">Nenhum produto cadastrado.</td>
+                    <td colspan="8" class="text-center">Nenhum produto cadastrado.</td>
                 </tr>
             @endforelse
         </tbody>
