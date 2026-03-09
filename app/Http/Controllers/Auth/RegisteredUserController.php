@@ -43,12 +43,13 @@ class RegisteredUserController extends Controller
             'nome' => $request->nome,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'tipo_usuario' => 'funcionario',
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(RouteServiceProvider::HOME);
+        return redirect()->route('leitor.produtos');
     }
 }
