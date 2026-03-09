@@ -1,268 +1,452 @@
-# Sistema de Fluxo de Caixa
+# Projeto Fluxo de Caixa
 
-Aplicacao web em Laravel 9 para controle financeiro e operacao de produtos, com acessos separados por perfil (`admin` e `funcionario`).
+Aplicacao web em Laravel 9 para controle financeiro e operacional, com autenticacao e autorizacao por perfil (`admin` e `funcionario`).
 
-## Visao Geral
+## Sumario
 
-O sistema possui dois ambientes principais:
+- [1. Objetivo do sistema](#1-objetivo-do-sistema)
+- [2. Funcionalidades por perfil](#2-funcionalidades-por-perfil)
+- [3. Arquitetura e stack](#3-arquitetura-e-stack)
+- [4. Banco de dados](#4-banco-de-dados)
+- [5. Arvore de diretorios](#5-arvore-de-diretorios)
+- [6. Instalacao e execucao](#6-instalacao-e-execucao)
+- [7. Credenciais padrao](#7-credenciais-padrao)
+- [8. Rotas principais](#8-rotas-principais)
+- [9. SQL util](#9-sql-util)
+- [10. Troubleshooting](#10-troubleshooting)
 
-- Painel administrativo (perfil `admin`)
-- Painel operacional de leitura/finalizacao (perfil `funcionario`)
+## 1. Objetivo do sistema
 
-O controle de permissao e feito por middlewares de perfil.
+O projeto centraliza dois contextos:
 
-## Perfis de Acesso
+- Financeiro: controle de lancamentos (entradas e saidas), tipos e centros de custo.
+- Operacional: cadastro e consulta de produtos, com simulacao de finalizacao de compra.
+
+O acesso e segregado por tipo de usuario:
+
+- `admin`: gerenciamento completo.
+- `funcionario`: consulta de produtos e fluxo de compra.
+
+## 2. Funcionalidades por perfil
 
 ### Admin
 
-Tem acesso completo a:
+1. Home com indicadores financeiros:
+- total de lancamentos
+- total de entradas
+- total de saidas
+- saldo atual
+- ultimos lancamentos
 
-- Dashboard e Home
-- Lancamentos (CRUD)
-- Tipos (CRUD)
-- Centro de custo (CRUD)
-- Usuarios (CRUD com tipo de usuario)
-- Produtos (CRUD com alerta de validade)
+2. Cadastro de usuarios:
+- criar usuario com `nome`, `email`, `senha`, `tipo_usuario`
+- editar usuario (inclusive tipo e senha opcional)
+- excluir usuario
+- protecoes:
+  - nao permite excluir o proprio usuario logado
+  - nao permite excluir o ultimo admin
+
+3. Cadastro de produtos:
+- campos: `id`, `nome`, `lote`, `quantidade`, `tipo_quantidade`, `validade`, `preco_compra`, `preco_venda`
+- `tipo_quantidade`: `caixa` ou `unidade`
+- editar e excluir produtos
+- alertas de vencimento:
+  - vencido
+  - vence hoje
+  - vence em ate 30 dias
+  - validade ok
+
+4. Fluxo de caixa:
+- CRUD de `tipos`
+- CRUD de `centro de custo`
+- CRUD de `lancamentos`
+- filtro de lancamentos por descricao e periodo
+- upload opcional de arquivo no lancamento
 
 ### Funcionario
 
-Tem acesso somente a:
+1. Leitor de produtos:
+- lista produtos com:
+  - nome
+  - quantidade
+  - valor do produto (`preco_compra`)
+  - total por item (`preco_compra * quantidade`)
+- exibe valor total da compra
 
-- Leitor de produtos (consulta)
-- Finalizacao de compra
+2. Finalizar compra:
+- formas de pagamento:
+  - PIX
+  - Dinheiro
+  - Cartao de debito
+  - Cartao de credito
+  - Boleto
+  - Vale alimentacao
+- opcao `Quer dividir valor?` (`sim` ou `nao`)
+- parcelamento de `1x` ate `12x`
+- calculo do valor por parcela na tela
+- ao confirmar, sistema retorna mensagem de sucesso
 
-Sem acesso a CRUD administrativo.
+Observacao: atualmente a finalizacao de compra nao gera pedido persistido em tabela propria.
 
-## Modulos do Sistema
+## 3. Arquitetura e stack
 
-### 1. Usuarios (Admin)
+- Backend: Laravel 9 (PHP 8.2+)
+- Frontend server-side: Blade
+- CSS/UI: Bootstrap 5 + Tailwind (via Vite)
+- Build front-end: Vite
+- Auth: Laravel Breeze
+- Banco: MySQL/MariaDB
 
-Cadastro e manutencao de usuarios com:
+Controle de acesso:
 
-- Nome
-- E-mail
-- Senha
-- Tipo de usuario (`admin` ou `funcionario`)
+- `admin` middleware (`App\Http\Middleware\AdminMiddleware`)
+- `funcionario` middleware (`App\Http\Middleware\FuncionarioMiddleware`)
 
-Regras de protecao implementadas:
+Fluxo de login:
 
-- Admin nao pode excluir o proprio usuario logado.
-- Nao e permitido excluir o ultimo usuario admin.
+- usuario `admin` redireciona para `dashboard`
+- usuario `funcionario` redireciona para `leitor-produtos`
 
-### 2. Fluxo de Caixa (Admin)
+## 4. Banco de dados
 
-Funcionalidades:
+### Tabelas principais
 
-- Cadastro de tipos
-- Cadastro de centros de custo
-- Cadastro de lancamentos de entrada e saida
-- Filtro por descricao e periodo
+1. `users`
+- `id_user` (PK)
+- `nome`
+- `email`
+- `password`
+- `tipo_usuario` (`admin` ou `funcionario`)
 
-### 3. Produtos (Admin)
+2. `tipos`
+- `id_tipo` (PK)
+- `tipo`
+- `deleted_at` (soft delete)
 
-Cadastro de produtos com os campos:
+3. `centro_custos`
+- `id_centro_custo` (PK)
+- `id_tipo`
+- `centro_custo`
+- `deleted_at` (soft delete)
 
-- ID
-- Nome
-- Lote
-- Quantidade
-- Tipo de quantidade (`caixa` ou `unidade`)
-- Validade do produto
-- Preco de compra
-- Preco de venda
+4. `lancamentos`
+- `id_lancamento` (PK)
+- `id_user`
+- `id_centro_custo`
+- `dt_faturamento`
+- `descricao`
+- `observacoes`
+- `valor`
+- `arquivo`
+- `deleted_at` (soft delete)
 
-Inclui:
+5. `produtos`
+- `id_produto` (PK)
+- `nome`
+- `lote`
+- `quantidade`
+- `tipo_quantidade` (`caixa` ou `unidade`)
+- `validade`
+- `preco_compra`
+- `preco_venda`
+- `deleted_at` (soft delete)
 
-- Edicao de produto
-- Exclusao de produto
-- Alertas de vencimento na listagem:
-  - Vencido
-  - Vence hoje
-  - Vence em ate 30 dias
-  - Validade ok
+### Seeders incluidos
 
-### 4. Leitor de Produtos (Funcionario)
+- `AdminUserSeeder`
+- `FuncionarioUserSeeder`
+- `DatabaseSeeder` (executa os dois seeders acima)
 
-Tela de consulta mostrando:
+## 5. Arvore de diretorios
 
-- Nome de cada produto
-- Quantidade de cada produto
-- Valor de cada produto (preco de compra)
-- Total por item (`preco_compra * quantidade`)
-- Valor total da compra
+Arvore resumida dos arquivos mais relevantes:
 
-### 5. Finalizar Compra (Funcionario)
+```text
+ProjetoFluxo_Caixa/
+|-- app/
+|   |-- Http/
+|   |   |-- Controllers/
+|   |   |   |-- CentroCustoController.php
+|   |   |   |-- CompraFuncionarioController.php
+|   |   |   |-- HomeController.php
+|   |   |   |-- LancamentoController.php
+|   |   |   |-- ProdutoController.php
+|   |   |   |-- TipoController.php
+|   |   |   `-- UsuarioController.php
+|   |   |-- Middleware/
+|   |   |   |-- AdminMiddleware.php
+|   |   |   `-- FuncionarioMiddleware.php
+|   |   `-- Requests/
+|   |       `-- Auth/
+|   |-- Models/
+|   |   |-- CentroCusto.php
+|   |   |-- Lancamento.php
+|   |   |-- Produto.php
+|   |   |-- Tipo.php
+|   |   `-- User.php
+|   `-- Mail/
+|       |-- OlaLeblanc.php
+|       `-- Teste.php
+|-- bootstrap/
+|-- config/
+|-- database/
+|   |-- migrations/
+|   |   |-- 2014_10_12_000000_create_users_table.php
+|   |   |-- 2022_09_19_170251_create_tipos_table.php
+|   |   |-- 2022_09_19_170333_create_centro_custos_table.php
+|   |   |-- 2022_09_19_170408_create_lancamentos_table.php
+|   |   |-- 2026_03_07_000000_add_tipo_usuario_to_users_table.php
+|   |   |-- 2026_03_07_010000_create_produtos_table.php
+|   |   `-- 2026_03_07_020000_add_lote_to_produtos_table.php
+|   `-- seeders/
+|       |-- AdminUserSeeder.php
+|       |-- DatabaseSeeder.php
+|       `-- FuncionarioUserSeeder.php
+|-- public/
+|-- resources/
+|   |-- css/
+|   |-- js/
+|   `-- views/
+|       |-- auth/
+|       |-- centro/
+|       |-- compra/
+|       |-- home/
+|       |-- lancamento/
+|       |-- layouts/
+|       |-- produto/
+|       |-- tipo/
+|       `-- usuario/
+|-- routes/
+|   |-- auth.php
+|   `-- web.php
+|-- tests/
+|-- .env-example
+|-- artisan
+|-- composer.json
+|-- package.json
+`-- README.md
+```
 
-Fluxo disponivel a partir do leitor de produtos.
+## 6. Instalacao e execucao
 
-Permite selecionar forma de pagamento padrao de mercado:
-
-- PIX
-- Dinheiro
-- Cartao de debito
-- Cartao de credito
-- Boleto
-- Vale alimentacao
-
-Opcao adicional:
-
-- `Quer dividir valor?` (`sim` ou `nao`)
-- Parcelamento de `1x` a `12x` para qualquer forma de pagamento
-- Exibicao do valor por parcela na tela
-
-Observacao:
-
-- A finalizacao gera confirmacao na interface (mensagem), sem persistencia de pedido/compra em tabela especifica.
-
-## Requisitos
+### 6.1 Requisitos
 
 - PHP 8.2+
 - Composer
-- MySQL ou MariaDB
-- Node.js + NPM
+- Node.js + npm
+- MySQL ou MariaDB em execucao
 
-## Stack Tecnica
+### 6.2 Passo a passo
 
-- Laravel 9
-- Laravel Breeze (autenticacao)
-- Blade
-- Bootstrap 5
-- Vite
-- Tailwind (dependencia instalada via Vite)
-
-## Instalacao e Execucao
-
-1. Acesse a pasta do projeto:
+1. Entrar na pasta do projeto:
 
 ```bash
 cd ProjetoFluxo_Caixa
 ```
 
-2. Instale dependencias PHP:
+2. Instalar dependencias PHP:
 
 ```bash
 composer install
 ```
 
-3. Crie o arquivo de ambiente:
+3. Criar arquivo de ambiente:
 
-```bash
-copy .env-example .env
+Windows PowerShell:
+
+```powershell
+Copy-Item .env-example .env
 ```
 
-4. Ajuste credenciais do banco no `.env`:
+Linux/macOS:
 
-- `DB_HOST`
-- `DB_PORT`
-- `DB_DATABASE`
-- `DB_USERNAME`
-- `DB_PASSWORD`
+```bash
+cp .env-example .env
+```
 
-5. Gere chave da aplicacao:
+4. Ajustar credenciais do banco no `.env`:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=fluxo_de_caixa
+DB_USERNAME=root
+DB_PASSWORD=sua_senha
+```
+
+5. Gerar chave da aplicacao:
 
 ```bash
 php artisan key:generate
 ```
 
-6. Rode migrations:
+6. Criar banco (se ainda nao existir) e rodar migrations:
+
+```sql
+CREATE DATABASE fluxo_de_caixa CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
 ```bash
 php artisan migrate
 ```
 
-7. Popule usuarios padrao:
+7. Popular usuarios padrao:
 
 ```bash
 php artisan db:seed
 ```
 
-8. Instale dependencias front-end:
+8. Instalar dependencias front-end e subir Vite:
 
 ```bash
 npm install
-```
-
-9. Rode o front-end:
-
-```bash
 npm run dev
 ```
 
-10. Em outro terminal, inicie o servidor:
+9. Em outro terminal, iniciar servidor Laravel:
 
 ```bash
 php artisan serve
 ```
 
-Aplicacao em:
+10. Acessar:
 
 - `http://127.0.0.1:8000`
 
-## Credenciais Padrao
+## 7. Credenciais padrao
 
-### Admin
+Admin:
 
 - Email: `admin@example.com`
 - Senha: `senha_admin`
 
-### Funcionario
+Funcionario:
 
 - Email: `funcionario@example.com`
 - Senha: `senha_funcionario`
 
-## Redirecionamento por Perfil
+## 8. Rotas principais
 
-- Admin: redireciona para `dashboard`
-- Funcionario: redireciona para `leitor-produtos`
+### Rotas base
 
-## Principais Rotas
+- `GET /` (redireciona por perfil)
+- `GET|POST /login`
+- `GET|POST /logout`
 
-### Funcionario
+### Admin (`auth + admin`)
+
+- `GET /dashboard`
+- `GET /home`
+- `GET|POST /usuario/*`
+- `GET|POST /produto/*`
+- `GET|POST /tipo/*`
+- `GET|POST /centro-de-custo/*`
+- `GET|POST /lancamento/*`
+
+### Funcionario (`auth + funcionario`)
 
 - `GET /leitor-produtos`
 - `GET /leitor-produtos/finalizar-compra`
 - `POST /leitor-produtos/finalizar-compra`
 
-### Admin
-
-- `GET /dashboard`
-- `GET/POST /usuario/*`
-- `GET/POST /produto/*`
-- `GET/POST /tipo/*`
-- `GET/POST /centro-de-custo/*`
-- `GET/POST /lancamento/*`
-
-## Comandos Uteis
+Para listar todas as rotas:
 
 ```bash
 php artisan route:list
-php artisan optimize:clear
-php artisan test
-npm run build
 ```
 
-## Troubleshooting
+## 9. SQL util
 
-### Erro "Could not open input file: artisan"
+Deletar usuario por ID:
 
-Execute os comandos dentro de:
+```sql
+DELETE FROM users WHERE id_user = 1;
+```
 
-`C:\Users\griso\Documents\projetos\fluxoCaixa\ProjetoFluxo_Caixa`
+Deletar usuario por email:
 
-### Erro de conexao com MySQL (HY000/2002)
+```sql
+DELETE FROM users WHERE email = 'usuario@exemplo.com';
+```
 
-- Verifique se o servico MySQL esta em execucao
-- Confira `DB_HOST` e `DB_PORT`
-- Confirme que o banco existe
+Importante:
 
-### Erro "Unknown database"
+- pela regra da aplicacao, excluir o proprio usuario logado e excluir o ultimo admin e bloqueado via tela de admin.
+- executando SQL direto no banco, essas regras nao sao aplicadas.
 
-Crie o banco informado em `DB_DATABASE` antes de rodar migration.
+## 10. Troubleshooting
 
-### Erro "Access denied for user"
+### Erro: `Could not open input file: artisan`
 
-Ajuste `DB_USERNAME` e `DB_PASSWORD` no `.env` e rode:
+Causa comum: comando rodado fora da pasta do Laravel.
+
+Solucao:
+
+```powershell
+cd C:\Users\griso\Documents\projetos\fluxoCaixa\ProjetoFluxo_Caixa
+php artisan serve
+```
+
+### Erro: `SQLSTATE[HY000] [2002] Nenhuma conexao... recusou ativamente`
+
+Causa comum:
+
+- MySQL parado
+- host/porta incorretos no `.env`
+
+Solucao:
+
+- iniciar servico MySQL
+- revisar `DB_HOST` e `DB_PORT`
+- limpar cache de configuracao:
 
 ```bash
 php artisan config:clear
+php artisan cache:clear
+```
+
+### Erro: `SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost'`
+
+Causa comum: usuario/senha incorretos no `.env`.
+
+Solucao:
+
+- atualizar `DB_USERNAME` e `DB_PASSWORD`
+- executar:
+
+```bash
+php artisan config:clear
+```
+
+### Erro: `SQLSTATE[HY000] [1049] Unknown database 'fluxo_de_caixa'`
+
+Causa comum: banco nao criado.
+
+Solucao:
+
+```sql
+CREATE DATABASE fluxo_de_caixa CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Depois:
+
+```bash
+php artisan migrate --seed
+```
+
+### Erro: `Target class [HomeController] does not exist`
+
+Checklist:
+
+- arquivo `app/Http/Controllers/HomeController.php` existe
+- namespace correto: `App\Http\Controllers`
+- import em `routes/web.php`:
+  - `use App\Http\Controllers\HomeController;`
+
+Se necessario:
+
+```bash
+composer dump-autoload
+php artisan optimize:clear
 ```
