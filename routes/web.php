@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 #Controllers
 use App\Http\Controllers\CentroCustoController;
 use App\Http\Controllers\CompraFuncionarioController;
+use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LancamentoController;
 use App\Http\Controllers\ProdutoController;
@@ -109,6 +110,18 @@ Route::prefix('produto')->middleware(['auth', 'admin'])->controller(ProdutoContr
     Route::post('/cadastrar', 'store')->      name('produto.store');
     Route::post('/atualizar/{id}', 'update')->name('produto.update');
     Route::post('/deletar/{id}', 'destroy')-> name('produto.delete');
+});
+
+/*
+|--------------------------------------------------------------------------
+| ESTOQUE / MOVIMENTACOES DE PRODUTO (ADMIN)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('estoque')->middleware(['auth', 'admin'])->controller(EstoqueController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->               name('estoque.index');
+    Route::post('/movimentar', 'store')->    name('estoque.store');
 });
 
 

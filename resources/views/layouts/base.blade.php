@@ -68,6 +68,10 @@
                                 <i class="bi bi-box-seam"></i>
                                 Produtos
                             </a>
+                            <a class="nav-link" href="{{ route('estoque.index') }}">
+                                <i class="bi bi-clipboard2-data"></i>
+                                Controle de Estoque
+                            </a>
                         @else
                             <a class="nav-link" href="{{ route('leitor.produtos') }}">
                                 <i class="bi bi-upc-scan"></i>
