@@ -63,6 +63,13 @@ O acesso e segregado por tipo de usuario:
 - filtro de lancamentos por descricao e periodo
 - upload opcional de arquivo no lancamento
 
+5. Controle de estoque e movimentacoes:
+- tela admin para registrar entradas e saidas por produto
+- filtro por dia, semana ou mes
+- resumo de quantidade de entradas e saidas
+- resumo de valor de venda (saidas)
+- estoque atual por produto com valor de venda
+
 ### Funcionario
 
 1. Leitor de produtos:
@@ -151,6 +158,15 @@ Fluxo de login:
 - `preco_venda`
 - `deleted_at` (soft delete)
 
+6. `movimentacao_produtos`
+- `id_movimentacao` (PK)
+- `id_produto`
+- `tipo_movimentacao` (`entrada` ou `saida`)
+- `quantidade`
+- `valor_unitario_venda`
+- `data_movimentacao`
+- `observacao`
+
 ### Seeders incluidos
 
 - `AdminUserSeeder`
@@ -168,6 +184,8 @@ ProjetoFluxo_Caixa/
 |   |   |-- Controllers/
 |   |   |   |-- CentroCustoController.php
 |   |   |   |-- CompraFuncionarioController.php
+|   |   |   |-- ControleFinanceiroController.php
+|   |   |   |-- EstoqueController.php
 |   |   |   |-- HomeController.php
 |   |   |   |-- LancamentoController.php
 |   |   |   |-- ProdutoController.php
@@ -181,6 +199,7 @@ ProjetoFluxo_Caixa/
 |   |-- Models/
 |   |   |-- CentroCusto.php
 |   |   |-- Lancamento.php
+|   |   |-- MovimentacaoProduto.php
 |   |   |-- Produto.php
 |   |   |-- Tipo.php
 |   |   `-- User.php
@@ -197,7 +216,10 @@ ProjetoFluxo_Caixa/
 |   |   |-- 2022_09_19_170408_create_lancamentos_table.php
 |   |   |-- 2026_03_07_000000_add_tipo_usuario_to_users_table.php
 |   |   |-- 2026_03_07_010000_create_produtos_table.php
-|   |   `-- 2026_03_07_020000_add_lote_to_produtos_table.php
+|   |   |-- 2026_03_07_020000_add_lote_to_produtos_table.php
+|   |   `-- 2026_03_09_030000_create_movimentacao_produtos_table.php
+|   |-- sql/
+|   |   `-- produtos_teste_100.sql
 |   `-- seeders/
 |       |-- AdminUserSeeder.php
 |       |-- DatabaseSeeder.php
@@ -210,6 +232,8 @@ ProjetoFluxo_Caixa/
 |       |-- auth/
 |       |-- centro/
 |       |-- compra/
+|       |-- controleFinanceiro/
+|       |-- estoque/
 |       |-- home/
 |       |-- lancamento/
 |       |-- layouts/
@@ -338,6 +362,9 @@ Funcionario:
 
 - `GET /dashboard`
 - `GET /home`
+- `GET /controle-financeiro`
+- `GET /estoque`
+- `POST /estoque/movimentar`
 - `GET|POST /usuario/*`
 - `GET|POST /produto/*`
 - `GET|POST /tipo/*`
@@ -374,6 +401,12 @@ Importante:
 
 - pela regra da aplicacao, excluir o proprio usuario logado e excluir o ultimo admin e bloqueado via tela de admin.
 - executando SQL direto no banco, essas regras nao sao aplicadas.
+
+Inserir 100 produtos de teste:
+
+```bash
+mysql -u root -p fluxo_de_caixa < database/sql/produtos_teste_100.sql
+```
 
 ## 10. Troubleshooting
 
@@ -433,6 +466,16 @@ Depois:
 
 ```bash
 php artisan migrate --seed
+```
+
+### Erro: `SQLSTATE[42S02] Table 'movimentacao_produtos' doesn't exist`
+
+Causa comum: migration de movimentacoes nao executada.
+
+Solucao:
+
+```bash
+php artisan migrate
 ```
 
 ### Erro: `Target class [HomeController] does not exist`
