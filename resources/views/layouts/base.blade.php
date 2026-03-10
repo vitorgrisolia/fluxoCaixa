@@ -72,6 +72,10 @@
                                 <i class="bi bi-clipboard2-data"></i>
                                 Controle de Estoque
                             </a>
+                            <a class="nav-link" href="{{ route('controle-financeiro.index') }}">
+                                <i class="bi bi-bank"></i>
+                                Controle Financeiro
+                            </a>
                         @else
                             <a class="nav-link" href="{{ route('leitor.produtos') }}">
                                 <i class="bi bi-upc-scan"></i>

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 #Controllers
 use App\Http\Controllers\CentroCustoController;
 use App\Http\Controllers\CompraFuncionarioController;
+use App\Http\Controllers\ControleFinanceiroController;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LancamentoController;
@@ -42,7 +43,7 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 | DASHBOARD
 |--------------------------------------------------------------------------
-| Thomas Melo - 19-09-2022
+| 
 */
 Route::prefix('dashboard')
     ->middleware(['auth', 'admin'])
@@ -53,9 +54,7 @@ Route::prefix('dashboard')
 
 });
 
-/*
-Kaue Castelani -HOME 29/11/2022
-*/
+
 Route::prefix('home')->middleware(['auth', 'admin'])->controller(HomeController::class)
 ->group(function ()
 {
@@ -125,13 +124,7 @@ Route::prefix('estoque')->middleware(['auth', 'admin'])->controller(EstoqueContr
 });
 
 
-/*
-|--------------------------------------------------------------------------
-| TIPOS
-|--------------------------------------------------------------------------
-| Thomas Melo - 19-09-2022
-*/
-//Metodo Prefixo Facilitar Rotas, Middleware(Definir Tipos de Acesso), Quando uso o prefixo, utilizar GROUP de rotas
+
 Route::prefix('tipo')->middleware(['auth', 'admin'])->controller(TipoController::class)
 ->group(function ()
 {
@@ -147,7 +140,6 @@ Route::prefix('tipo')->middleware(['auth', 'admin'])->controller(TipoController:
 |--------------------------------------------------------------------------
 | CENTRO DE CUSTO
 |--------------------------------------------------------------------------
-| Thomas Melo - 19-09-2022
 */
 Route::prefix('centro-de-custo')->middleware(['auth', 'admin'])->controller(CentroCustoController::class)
 ->group(function ()
@@ -164,7 +156,7 @@ Route::prefix('centro-de-custo')->middleware(['auth', 'admin'])->controller(Cent
 |--------------------------------------------------------------------------
 | LANÇAMENTOS
 |--------------------------------------------------------------------------
-| Thomas Melo - 19-09-2022
+|
 */
 Route::prefix('lancamento')->middleware(['auth', 'admin'])->controller(LancamentoController::class)
 ->group(function ()
@@ -179,9 +171,21 @@ Route::prefix('lancamento')->middleware(['auth', 'admin'])->controller(Lancament
 });
 /*
 |--------------------------------------------------------------------------
+| Controle Financeiro
+|--------------------------------------------------------------------------
+|
+*/
+Route::prefix('controle-financeiro')->middleware(['auth', 'admin'])->controller(ControleFinanceiroController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('controle-financeiro.index');
+
+});
+/*
+|--------------------------------------------------------------------------
 | RELATORIOS
 |--------------------------------------------------------------------------
-| Thomas Melo - 19-09-2022
+| 
 */
 
 
