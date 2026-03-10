@@ -42,7 +42,7 @@
     <div class="col">
         <div class="card">
             <div class="card-body">
-                <p class="card-text">Margem Bruta:</p>
+                <p class="card-text">Margem Bruta de Venda:</p>
                 <h5 class="card-title">R$ {{number_format($margem, 1) }}%</h5>
             </div>
         </div>

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CentroCustoController;
 use App\Http\Controllers\CompraFuncionarioController;
 use App\Http\Controllers\ControleFinanceiroController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LancamentoController;
@@ -48,9 +49,7 @@ Route::get('/', function () {
 Route::prefix('dashboard')
     ->middleware(['auth', 'admin'])
     ->group( function(){
-        Route::get('/', function () { 
-            return view('dashboard');
-        })->name('dashboard');
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
 });
 

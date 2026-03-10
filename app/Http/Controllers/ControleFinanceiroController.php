@@ -26,8 +26,15 @@
                 ->orderBy('dt_faturamento', 'desc')
                 ->get();
 
-            $entrada = $lancamentos->filter(fn($l) => optional($l->centroCusto->tipo)->tipo === 'entrada')->sum('valor');
-            $saida = $lancamentos->filter(fn($l) => optional($l->centroCusto->tipo)->tipo === 'saida')->sum('valor');
+            $entrada = $lancamentos->filter(function ($lancamento) {
+                $tipo = strtolower((string) optional($lancamento->centroCusto->tipo)->tipo);
+                return str_contains($tipo, 'entrada') || str_contains($tipo, 'receita');
+            })->sum('valor');
+
+            $saida = $lancamentos->filter(function ($lancamento) {
+                $tipo = strtolower((string) optional($lancamento->centroCusto->tipo)->tipo);
+                return str_contains($tipo, 'saida') || str_contains($tipo, 'despesa');
+            })->sum('valor');
 
             $saldo = $entrada - $saida;
 

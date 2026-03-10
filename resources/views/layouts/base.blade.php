@@ -31,7 +31,8 @@
         <nav class="navbar navbar-expand-lg navbar-light">
             <div class="container-fluid">
                 <a class="navbar-brand" href="/">
-                    Fluxo de Caixa
+                    <img src="{{ asset('img/logo-grisolia.jpg') }}" alt="Grisolia Sistema" class="brand-logo me-2 mr-2">
+                    Caixa
                     - {{ Auth::user()->nome }}
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavFluxo"
