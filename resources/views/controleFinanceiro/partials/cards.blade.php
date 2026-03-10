@@ -2,7 +2,7 @@
     <div class="col">
         <div class="card">
             <div class="card-body">
-                <p class="card-text">Total de Preço de Compras:</p>
+                <p class="card-text">Preço de Compras:</p>
                 <h5 class="card-title">R$ {{number_format($totalCompra, 2, ',', '.') }}</h5>
             </div>
         </div>
@@ -10,7 +10,7 @@
     <div class="col">
         <div class="card">
             <div class="card-body">
-                <p class="card-text">Total Preço de Venda:</p>
+                <p class="card-text">Preço de Venda:</p>
                 <h5 class="card-title">R$ {{number_format($totalVenda, 2, ',', '.') }}</h5>
             </div>
         </div>
