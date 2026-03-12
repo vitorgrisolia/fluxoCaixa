@@ -4,12 +4,15 @@ use Illuminate\Support\Facades\Route;
 #Controllers
 use App\Http\Controllers\CentroCustoController;
 use App\Http\Controllers\CompraFuncionarioController;
+use App\Http\Controllers\ConfiguracaoController;
 use App\Http\Controllers\ControleFinanceiroController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\FechamentoCaixaController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HistoricoCompraController;
 use App\Http\Controllers\LancamentoController;
+use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\RelatorioController;
 use App\Http\Controllers\TipoController;
@@ -94,6 +97,23 @@ Route::prefix('leitor-produtos')->middleware(['auth', 'funcionario'])->controlle
 {
     Route::get('/finalizar-compra', 'create')->name('leitor.finalizar');
     Route::post('/finalizar-compra', 'store')->name('leitor.finalizar.store');
+});
+
+/*
+|--------------------------------------------------------------------------
+| HISTORICO DE COMPRAS (FUNCIONARIO)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('leitor-produtos/historico')->middleware(['auth', 'funcionario'])->controller(HistoricoCompraController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('leitor.historico.index');
+    Route::get('/novo', 'create')->name('leitor.historico.create');
+    Route::get('/editar/{id}', 'edit')->name('leitor.historico.edit');
+    Route::get('/mostrar/{id}', 'show')->name('leitor.historico.show');
+    Route::post('/cadastrar', 'store')->name('leitor.historico.store');
+    Route::post('/atualizar/{id}', 'update')->name('leitor.historico.update');
+    Route::post('/deletar/{id}', 'destroy')->name('leitor.historico.destroy');
 });
 
 /*
@@ -185,6 +205,18 @@ Route::prefix('controle-financeiro')->middleware(['auth', 'admin'])->controller(
 
 /*
 |--------------------------------------------------------------------------
+| CONFIGURACOES GERAIS
+|--------------------------------------------------------------------------
+*/
+Route::prefix('configuracoes')->middleware(['auth', 'admin'])->controller(ConfiguracaoController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('configuracoes.index');
+    Route::post('/atualizar', 'update')->name('configuracoes.update');
+});
+
+/*
+|--------------------------------------------------------------------------
 | FECHAMENTO DE CAIXA
 |--------------------------------------------------------------------------
 |
@@ -212,6 +244,19 @@ Route::prefix('relatorios')->middleware(['auth', 'admin'])->controller(Relatorio
     Route::get('/', 'index')->name('relatorios.index');
     Route::get('/exportar/csv', 'exportCsv')->name('relatorios.export.csv');
     Route::get('/exportar/pdf', 'exportPdf')->name('relatorios.export.pdf');
+});
+
+/*
+|--------------------------------------------------------------------------
+| PERFIL (ADMIN E FUNCIONARIO)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('perfil')->middleware(['auth'])->controller(PerfilController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('perfil.index');
+    Route::post('/atualizar', 'update')->name('perfil.update');
+    Route::post('/senha', 'updatePassword')->name('perfil.password');
 });
 
 

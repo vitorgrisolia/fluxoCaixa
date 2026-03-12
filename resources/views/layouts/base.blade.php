@@ -80,6 +80,10 @@
                                 <i class="bi bi-bank"></i>
                                 Controle Financeiro
                             </a>
+                            <a class="nav-link {{ $isRoute('configuracoes.*') ? 'is-active' : '' }}" href="{{ route('configuracoes.index') }}" @if($isRoute('configuracoes.*')) aria-current="page" @endif>
+                                <i class="bi bi-gear-fill"></i>
+                                Configuracoes
+                            </a>
                             <a class="nav-link {{ $isRoute('relatorios.*') ? 'is-active' : '' }}" href="{{ route('relatorios.index') }}" @if($isRoute('relatorios.*')) aria-current="page" @endif>
                                 <i class="bi bi-graph-up-arrow"></i>
                                 Relatorios
@@ -97,11 +101,19 @@
                                 <i class="bi bi-cart-check-fill"></i>
                                 Finalizar compra
                             </a>
+                            <a class="nav-link {{ $isRoute('leitor.historico.*') ? 'is-active' : '' }}" href="{{ route('leitor.historico.index') }}" @if($isRoute('leitor.historico.*')) aria-current="page" @endif>
+                                <i class="bi bi-clock-history"></i>
+                                Historico de compras
+                            </a>
                             <a class="nav-link {{ $isRoute('fechamento-caixa.*') ? 'is-active' : '' }}" href="{{ route('fechamento-caixa.index') }}" @if($isRoute('fechamento-caixa.*')) aria-current="page" @endif>
                                 <i class="bi bi-cash-stack"></i>
                                 Fechamento de Caixa
                             </a>
                         @endif
+                        <a class="nav-link {{ $isRoute('perfil.*') ? 'is-active' : '' }}" href="{{ route('perfil.index') }}" @if($isRoute('perfil.*')) aria-current="page" @endif>
+                            <i class="bi bi-person-circle"></i>
+                            Perfil
+                        </a>
                         <a class="nav-link" href="{{ route('logout') }}">
                             <i class="bi bi-box-arrow-right"></i>
                             Sair

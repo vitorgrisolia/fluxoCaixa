@@ -295,6 +295,41 @@ h3,
     box-shadow: var(--shadow-2);
 }
 
+.error-shell {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px 48px;
+}
+
+.error-card {
+    width: min(520px, 100%);
+    padding: 32px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: var(--shadow-1);
+    text-align: center;
+}
+
+.error-code {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--brand-700);
+    line-height: 1;
+}
+
+.error-title {
+    margin-top: 12px;
+    font-size: 1.6rem;
+}
+
+.error-text {
+    margin-top: 8px;
+    color: var(--ink-500);
+}
+
 .app-footer {
     margin-top: 32px;
     padding: 18px 0 28px;
