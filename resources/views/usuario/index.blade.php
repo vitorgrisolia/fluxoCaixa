@@ -34,7 +34,7 @@
         $emEdicao = !is_null($usuarioEdicao);
     @endphp
 
-    <div class="card mb-4">
+    <div class="card mb-4 mt-3">
         <div class="card-header pb-0">
             <ul class="nav nav-tabs card-header-tabs" role="tablist">
                 <li class="nav-item" role="presentation">

@@ -32,6 +32,10 @@
             <main class="container app-content">
                 {{ $slot }}
             </main>
+
+            <div class="container">
+                @include('layouts.footer')
+            </div>
         </div>
     </body>
 </html>

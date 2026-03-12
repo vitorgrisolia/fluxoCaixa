@@ -4,7 +4,7 @@
     
     <h1>Tipos de Lançamentos</h1>
     -
-    <a href="{{ route('tipo.create') }}" class="btn btn-dark">
+    <a href="{{ route('tipo.create') }}" class="btn btn-dark mb-3 mt-3">
         Novo
     </a>
 

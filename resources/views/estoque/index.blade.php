@@ -2,11 +2,11 @@
 
 @section('conteudo')
 <div class="col-md-12">
-    <h1>
+    <h1 class="mb-3">
         <i class="bi bi-clipboard2-data"></i>
         Controle de Entradas e Saidas de Produtos
     </h1>
-    <p class="text-muted">
+    <p class="text-muted text-center mb-2">
         Filtro por dia, semana ou mes, com estoque atual e resumo de valor de venda.
     </p>
 

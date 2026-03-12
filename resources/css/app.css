@@ -29,9 +29,9 @@ body.app-body {
     font-family: "Space Grotesk", "Segoe UI", sans-serif;
     color: var(--ink-900);
     background:
-        radial-gradient(1200px 600px at 10% -10%, rgba(244, 162, 97, 0.25), transparent 60%),
-        radial-gradient(900px 500px at 90% -20%, rgba(42, 157, 143, 0.25), transparent 55%),
-        linear-gradient(120deg, var(--surface-200), var(--surface-300));
+        radial-gradient(1200px 600px at 10% -10%, rgba(97, 244, 100, 0.475), transparent 60%),
+        radial-gradient(900px 500px at 90% -20%, rgba(55, 107, 252, 0.83), transparent 55%),
+        linear-gradient(120deg, #26268a, #5373cd);
     min-height: 100vh;
 }
 
@@ -268,4 +268,44 @@ h3,
     width: auto;
     border-radius: 10px;
     box-shadow: var(--shadow-2);
+}
+
+.app-footer {
+    margin-top: 32px;
+    padding: 18px 0 28px;
+    color: var(--ink-700);
+}
+
+.app-footer__content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.86);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: var(--shadow-2);
+    backdrop-filter: blur(14px);
+}
+
+.app-footer__brand {
+    font-weight: 700;
+    color: var(--brand-900);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.app-footer__meta {
+    font-size: 0.85rem;
+    color: var(--ink-500);
+}
+
+@media (max-width: 576px) {
+    .app-footer__content {
+        justify-content: center;
+        text-align: center;
+    }
 }

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'CaixaGrisolia') }}</title>
+    <title>{{ config('app.name', 'GrisoliaSistema') }}</title>
 
     <!-- Fonts -->
     <link rel="stylesheet" href="https://fonts.bunny.net/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&display=swap">
@@ -31,7 +31,7 @@
         <nav class="navbar navbar-expand-lg navbar-light">
             <div class="container-fluid">
                 <a class="navbar-brand" href="/">
-                    <img src="{{ asset('img/logo-grisolia.jpg') }}" alt="Grisolia Sistema" class="brand-logo me-2 mr-2">
+                    <img src="{{ asset('img/logo-grisolia.jpg') }}" alt="Grisolia Sistema" class="brand-logo me-2">
                     Caixa
                     - {{ Auth::user()->nome }}
                 </a>
@@ -42,7 +42,7 @@
                 @php
                     $isAdmin = Auth::user()->tipo_usuario === 'admin';
                 @endphp
-                <div class="collapse navbar-collapse" id="navbarNavFluxo">
+                <div class="collapse navbar-collapse ml-3" id="navbarNavFluxo">
                     <div class="navbar-nav">
                         @if($isAdmin)
                             <a class="nav-link" href="{{ route('home.index') }}">
@@ -102,8 +102,9 @@
             @yield('conteudo')
         </main>
         {{-- CONTEUDO --}}
-    </div>
 
+        @include('layouts.footer')
+    </div>
     @yield('script')
 </body>
 </html>
