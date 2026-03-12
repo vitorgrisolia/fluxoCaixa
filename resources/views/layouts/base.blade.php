@@ -41,56 +41,63 @@
                 </button>
                 @php
                     $isAdmin = Auth::user()->tipo_usuario === 'admin';
+                    $isRoute = function ($patterns) {
+                        return request()->routeIs((array) $patterns);
+                    };
                 @endphp
                 <div class="collapse navbar-collapse ml-3" id="navbarNavFluxo">
                     <div class="navbar-nav">
                         @if($isAdmin)
-                            <a class="nav-link" href="{{ route('home.index') }}">
+                            <a class="nav-link {{ $isRoute('home.*') ? 'is-active' : '' }}" href="{{ route('home.index') }}" @if($isRoute('home.*')) aria-current="page" @endif>
                                 <i class="bi bi-house-door-fill"></i>
                                 Home
                             </a>
-                            <a class="nav-link" href="{{ route('lancamento.index') }}">
+                            <a class="nav-link {{ $isRoute('lancamento.*') ? 'is-active' : '' }}" href="{{ route('lancamento.index') }}" @if($isRoute('lancamento.*')) aria-current="page" @endif>
                                 <i class="bi bi-piggy-bank-fill"></i>
                                 Lancamentos
                             </a>
-                            <a class="nav-link" href="{{ route('centro.index') }}">
+                            <a class="nav-link {{ $isRoute('centro.*') ? 'is-active' : '' }}" href="{{ route('centro.index') }}" @if($isRoute('centro.*')) aria-current="page" @endif>
                                 <i class="bi bi-basket-fill"></i>
                                 Centro de Custo
                             </a>
-                            <a class="nav-link" href="{{ route('tipo.index') }}">
+                            <a class="nav-link {{ $isRoute('tipo.*') ? 'is-active' : '' }}" href="{{ route('tipo.index') }}" @if($isRoute('tipo.*')) aria-current="page" @endif>
                                 <i class="bi bi-arrow-down-up"></i>
                                 Tipos
                             </a>
-                            <a class="nav-link" href="{{ route('usuario.index') }}">
+                            <a class="nav-link {{ $isRoute('usuario.*') ? 'is-active' : '' }}" href="{{ route('usuario.index') }}" @if($isRoute('usuario.*')) aria-current="page" @endif>
                                 <i class="bi bi-people-fill"></i>
                                 Usuarios
                             </a>
-                            <a class="nav-link" href="{{ route('produto.index') }}">
+                            <a class="nav-link {{ $isRoute('produto.*') ? 'is-active' : '' }}" href="{{ route('produto.index') }}" @if($isRoute('produto.*')) aria-current="page" @endif>
                                 <i class="bi bi-box-seam"></i>
                                 Produtos
                             </a>
-                            <a class="nav-link" href="{{ route('estoque.index') }}">
+                            <a class="nav-link {{ $isRoute('estoque.*') ? 'is-active' : '' }}" href="{{ route('estoque.index') }}" @if($isRoute('estoque.*')) aria-current="page" @endif>
                                 <i class="bi bi-clipboard2-data"></i>
                                 Controle de Estoque
                             </a>
-                            <a class="nav-link" href="{{ route('controle-financeiro.index') }}">
+                            <a class="nav-link {{ $isRoute('controle-financeiro.*') ? 'is-active' : '' }}" href="{{ route('controle-financeiro.index') }}" @if($isRoute('controle-financeiro.*')) aria-current="page" @endif>
                                 <i class="bi bi-bank"></i>
                                 Controle Financeiro
                             </a>
-                            <a class="nav-link" href="{{ route('fechamento-caixa.index') }}">
+                            <a class="nav-link {{ $isRoute('relatorios.*') ? 'is-active' : '' }}" href="{{ route('relatorios.index') }}" @if($isRoute('relatorios.*')) aria-current="page" @endif>
+                                <i class="bi bi-graph-up-arrow"></i>
+                                Relatorios
+                            </a>
+                            <a class="nav-link {{ $isRoute('fechamento-caixa.*') ? 'is-active' : '' }}" href="{{ route('fechamento-caixa.index') }}" @if($isRoute('fechamento-caixa.*')) aria-current="page" @endif>
                                 <i class="bi bi-cash-stack"></i>
                                 Fechamento de Caixa
                             </a>
                         @else
-                            <a class="nav-link" href="{{ route('leitor.produtos') }}">
+                            <a class="nav-link {{ $isRoute('leitor.produtos') ? 'is-active' : '' }}" href="{{ route('leitor.produtos') }}" @if($isRoute('leitor.produtos')) aria-current="page" @endif>
                                 <i class="bi bi-upc-scan"></i>
                                 Leitor de Produtos
                             </a>
-                            <a class="nav-link" href="{{ route('leitor.finalizar') }}">
+                            <a class="nav-link {{ $isRoute('leitor.finalizar*') ? 'is-active' : '' }}" href="{{ route('leitor.finalizar') }}" @if($isRoute('leitor.finalizar*')) aria-current="page" @endif>
                                 <i class="bi bi-cart-check-fill"></i>
                                 Finalizar compra
                             </a>
-                            <a class="nav-link" href="{{ route('fechamento-caixa.index') }}">
+                            <a class="nav-link {{ $isRoute('fechamento-caixa.*') ? 'is-active' : '' }}" href="{{ route('fechamento-caixa.index') }}" @if($isRoute('fechamento-caixa.*')) aria-current="page" @endif>
                                 <i class="bi bi-cash-stack"></i>
                                 Fechamento de Caixa
                             </a>

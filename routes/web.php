@@ -11,6 +11,7 @@ use App\Http\Controllers\FechamentoCaixaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LancamentoController;
 use App\Http\Controllers\ProdutoController;
+use App\Http\Controllers\RelatorioController;
 use App\Http\Controllers\TipoController;
 use App\Http\Controllers\UsuarioController;
 
@@ -205,6 +206,13 @@ Route::prefix('fechamento-caixa')->middleware(['auth'])->controller(FechamentoCa
 |--------------------------------------------------------------------------
 | 
 */
+Route::prefix('relatorios')->middleware(['auth', 'admin'])->controller(RelatorioController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('relatorios.index');
+    Route::get('/exportar/csv', 'exportCsv')->name('relatorios.export.csv');
+    Route::get('/exportar/pdf', 'exportPdf')->name('relatorios.export.pdf');
+});
 
 
 
