@@ -40,6 +40,10 @@
                     <label class="form-check-label" for="secao_fechamento_caixa">Fechamento de caixa</label>
                 </div>
                 <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="secoes[]" id="secao_auditoria" value="auditoria" {{ $mostrar['auditoria'] ? 'checked' : '' }}>
+                    <label class="form-check-label" for="secao_auditoria">Auditoria</label>
+                </div>
+                <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="secoes[]" id="secao_lancamentos" value="lancamentos" {{ $mostrar['lancamentos'] ? 'checked' : '' }}>
                     <label class="form-check-label" for="secao_lancamentos">Lancamentos</label>
                 </div>
@@ -207,6 +211,46 @@
                                 <tr>
                                     <td colspan="9" class="text-center text-muted">
                                         Nenhum fechamento de caixa encontrado no periodo.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($mostrar['auditoria'])
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-body">
+                <h2 class="h6 mb-3">Auditoria</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped table-border table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Usuario</th>
+                                <th>Acao</th>
+                                <th>Descricao</th>
+                                <th>Rota</th>
+                                <th>IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($auditorias as $log)
+                                <tr>
+                                    <td>{{ \Carbon\Carbon::parse($log->created_at)->format('d/m/Y H:i') }}</td>
+                                    <td>{{ optional($log->usuario)->nome ?? '-' }}</td>
+                                    <td>{{ $log->acao }}</td>
+                                    <td>{{ $log->descricao ?? '-' }}</td>
+                                    <td>{{ $log->rota ?? $log->url }}</td>
+                                    <td>{{ $log->ip ?? '-' }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        Nenhum registro encontrado no periodo.
                                     </td>
                                 </tr>
                             @endforelse

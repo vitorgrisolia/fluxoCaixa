@@ -56,6 +56,7 @@
                             <th>Data</th>
                             <th>Usuario</th>
                             <th>Acao</th>
+                            <th>Descricao</th>
                             <th>Metodo</th>
                             <th>Rota</th>
                             <th>IP</th>
@@ -68,6 +69,7 @@
                                 <td>{{ \Carbon\Carbon::parse($log->created_at)->format('d/m/Y H:i') }}</td>
                                 <td>{{ optional($log->usuario)->nome ?? '-' }}</td>
                                 <td>{{ $log->acao }}</td>
+                                <td>{{ $log->descricao ?? '-' }}</td>
                                 <td>{{ $log->metodo }}</td>
                                 <td>{{ $log->rota ?? $log->url }}</td>
                                 <td>{{ $log->ip ?? '-' }}</td>
@@ -81,7 +83,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted">
+                                <td colspan="8" class="text-center text-muted">
                                     Nenhum registro encontrado.
                                 </td>
                             </tr>

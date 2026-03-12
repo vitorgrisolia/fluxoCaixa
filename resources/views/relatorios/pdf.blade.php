@@ -155,6 +155,40 @@
         </div>
     @endif
 
+    @if ($mostrar['auditoria'])
+        <div class="section">
+            <h2>Auditoria</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Usuario</th>
+                        <th>Acao</th>
+                        <th>Descricao</th>
+                        <th>Rota</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($auditorias as $log)
+                        <tr>
+                            <td>{{ \Carbon\Carbon::parse($log->created_at)->format('d/m/Y H:i') }}</td>
+                            <td>{{ optional($log->usuario)->nome ?? '-' }}</td>
+                            <td>{{ $log->acao }}</td>
+                            <td>{{ $log->descricao ?? '-' }}</td>
+                            <td>{{ $log->rota ?? $log->url }}</td>
+                            <td>{{ $log->ip ?? '-' }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="muted">Nenhum registro encontrado no periodo.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    @endif
+
     @if ($mostrar['lancamentos'])
         <div class="section">
             <h2>Lancamentos</h2>

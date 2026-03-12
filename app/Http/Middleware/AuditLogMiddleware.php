@@ -33,10 +33,12 @@ class AuditLogMiddleware
 
         $rota = optional($request->route())->getName();
         $acao = $this->resolverAcao($request, $rota);
+        $descricao = $this->resolverDescricao($request, $rota, $acao);
 
         AuditoriaLog::create([
             'id_user' => $usuario->id_user,
             'acao' => $acao,
+            'descricao' => $descricao,
             'rota' => $rota,
             'metodo' => $request->method(),
             'url' => substr((string) $request->path(), 0, 255),
@@ -54,7 +56,7 @@ class AuditLogMiddleware
             return false;
         }
 
-        if (in_array($request->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
+        if (in_array($request->method(), ['HEAD', 'OPTIONS'], true)) {
             return false;
         }
 
@@ -68,11 +70,11 @@ class AuditLogMiddleware
 
     private function resolverAcao(Request $request, ?string $rota): string
     {
-        if ($rota === 'login') {
+        if ($rota === 'login' || $request->path() === 'login') {
             return 'LOGIN';
         }
 
-        if ($rota === 'logout') {
+        if ($rota === 'logout' || $request->path() === 'logout') {
             return 'LOGOUT';
         }
 
@@ -88,7 +90,67 @@ class AuditLogMiddleware
             }
         }
 
+        if ($request->method() === 'GET') {
+            return 'ACESSO';
+        }
+
         return strtoupper($request->method());
+    }
+
+    private function resolverDescricao(Request $request, ?string $rota, string $acao): string
+    {
+        if ($acao === 'LOGIN') {
+            return 'Realizou login no sistema.';
+        }
+
+        if ($acao === 'LOGOUT') {
+            return 'Realizou logout do sistema.';
+        }
+
+        $entidade = $this->resolverEntidade($rota);
+        $id = $request->route('id');
+        $idTexto = $id ? " (ID {$id})" : '';
+
+        return match ($acao) {
+            'CRIAR' => "Criou {$entidade}{$idTexto}.",
+            'ATUALIZAR' => "Atualizou {$entidade}{$idTexto}.",
+            'EXCLUIR' => "Excluiu {$entidade}{$idTexto}.",
+            'ACESSO' => "Acessou {$entidade}.",
+            default => "Executou acao {$acao} em {$entidade}.",
+        };
+    }
+
+    private function resolverEntidade(?string $rota): string
+    {
+        if (! $rota) {
+            return 'pagina do sistema';
+        }
+
+        $mapa = [
+            'dashboard' => 'Dashboard',
+            'home' => 'Home',
+            'lancamento' => 'Lancamentos',
+            'centro' => 'Centro de custo',
+            'tipo' => 'Tipos',
+            'usuario' => 'Usuarios',
+            'produto' => 'Produtos',
+            'estoque' => 'Controle de estoque',
+            'controle-financeiro' => 'Controle financeiro',
+            'relatorios' => 'Relatorios',
+            'fechamento-caixa' => 'Fechamento de caixa',
+            'leitor' => 'Leitor de produtos',
+            'perfil' => 'Perfil',
+            'configuracoes' => 'Configuracoes',
+            'auditoria' => 'Auditoria',
+        ];
+
+        foreach ($mapa as $prefixo => $nome) {
+            if (str_starts_with($rota, $prefixo)) {
+                return $nome;
+            }
+        }
+
+        return "rota {$rota}";
     }
 
     private function filtrarDados(array $dados): array
@@ -111,9 +173,31 @@ class AuditLogMiddleware
                 continue;
             }
 
-            $filtrados[$chave] = is_array($valor) ? $valor : (string) $valor;
+            if (is_array($valor)) {
+                $filtrados[$chave] = $this->sanitizarArray($valor);
+            } elseif (is_object($valor)) {
+                $filtrados[$chave] = '[objeto]';
+            } else {
+                $filtrados[$chave] = (string) $valor;
+            }
         }
 
         return $filtrados;
+    }
+
+    private function sanitizarArray(array $valores): array
+    {
+        $resultado = [];
+        foreach ($valores as $chave => $valor) {
+            if (is_array($valor)) {
+                $resultado[$chave] = $this->sanitizarArray($valor);
+            } elseif (is_object($valor)) {
+                $resultado[$chave] = '[objeto]';
+            } else {
+                $resultado[$chave] = (string) $valor;
+            }
+        }
+
+        return $resultado;
     }
 }

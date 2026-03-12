@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\FechamentoCaixa;
+use App\Models\AuditoriaLog;
 use App\Models\Lancamento;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -34,6 +35,9 @@ class RelatorioController extends Controller
         $fechamentos = $mostrar['fechamento_caixa']
             ? $this->carregarFechamentos($dataInicio, $dataFim)
             : collect();
+        $auditorias = $mostrar['auditoria']
+            ? $this->carregarAuditorias($dataInicio, $dataFim)
+            : collect();
 
         return view('relatorios.index')->with([
             'dataInicio' => $dataInicio,
@@ -45,6 +49,7 @@ class RelatorioController extends Controller
             'porCentro' => $porCentro,
             'porTipo' => $porTipo,
             'fechamentos' => $fechamentos,
+            'auditorias' => $auditorias,
             'mostrar' => $mostrar,
         ]);
     }
@@ -72,6 +77,9 @@ class RelatorioController extends Controller
         $fechamentos = $mostrar['fechamento_caixa']
             ? $this->carregarFechamentos($dataInicio, $dataFim)
             : collect();
+        $auditorias = $mostrar['auditoria']
+            ? $this->carregarAuditorias($dataInicio, $dataFim)
+            : collect();
 
         $nomeArquivo = "relatorio_{$dataInicio}_a_{$dataFim}.csv";
 
@@ -80,7 +88,7 @@ class RelatorioController extends Controller
             'Content-Disposition' => "attachment; filename=\"{$nomeArquivo}\"",
         ];
 
-        $callback = function () use ($lancamentos, $dataInicio, $dataFim, $entrada, $saida, $saldo, $porCentro, $porTipo, $fechamentos, $mostrar) {
+        $callback = function () use ($lancamentos, $dataInicio, $dataFim, $entrada, $saida, $saldo, $porCentro, $porTipo, $fechamentos, $auditorias, $mostrar) {
             $handle = fopen('php://output', 'w');
             fprintf($handle, "\xEF\xBB\xBF");
 
@@ -138,6 +146,22 @@ class RelatorioController extends Controller
                 fputcsv($handle, [], ';');
             }
 
+            if ($mostrar['auditoria']) {
+                fputcsv($handle, ['Auditoria'], ';');
+                fputcsv($handle, ['Data', 'Usuario', 'Acao', 'Descricao', 'Rota', 'IP'], ';');
+                foreach ($auditorias as $log) {
+                    fputcsv($handle, [
+                        Carbon::parse($log->created_at)->format('d/m/Y H:i'),
+                        optional($log->usuario)->nome ?? '-',
+                        $log->acao,
+                        $log->descricao ?? '-',
+                        $log->rota ?? $log->url,
+                        $log->ip ?? '-',
+                    ], ';');
+                }
+                fputcsv($handle, [], ';');
+            }
+
             if ($mostrar['lancamentos']) {
                 fputcsv($handle, ['Lancamentos'], ';');
                 fputcsv($handle, ['Data', 'Descricao', 'Centro de custo', 'Tipo', 'Responsavel', 'Valor'], ';');
@@ -182,6 +206,9 @@ class RelatorioController extends Controller
         $fechamentos = $mostrar['fechamento_caixa']
             ? $this->carregarFechamentos($dataInicio, $dataFim)
             : collect();
+        $auditorias = $mostrar['auditoria']
+            ? $this->carregarAuditorias($dataInicio, $dataFim)
+            : collect();
 
         $pdf = Pdf::loadView('relatorios.pdf', [
             'dataInicio' => $dataInicio,
@@ -193,6 +220,7 @@ class RelatorioController extends Controller
             'porCentro' => $porCentro,
             'porTipo' => $porTipo,
             'fechamentos' => $fechamentos,
+            'auditorias' => $auditorias,
             'mostrar' => $mostrar,
         ])->setPaper('a4', 'portrait');
 
@@ -211,7 +239,7 @@ class RelatorioController extends Controller
 
     private function resolverSecoes(Request $request): array
     {
-        $todas = ['resumo', 'por_centro', 'por_tipo', 'fechamento_caixa', 'lancamentos'];
+        $todas = ['resumo', 'por_centro', 'por_tipo', 'fechamento_caixa', 'auditoria', 'lancamentos'];
         $secoes = $request->get('secoes');
 
         if (empty($secoes)) {
@@ -242,6 +270,17 @@ class RelatorioController extends Controller
         return FechamentoCaixa::with('usuario')
             ->whereBetween('data_fechamento', [$dataInicio, $dataFim])
             ->orderBy('data_fechamento', 'desc')
+            ->get();
+    }
+
+    private function carregarAuditorias(string $dataInicio, string $dataFim)
+    {
+        $inicio = Carbon::parse($dataInicio)->startOfDay();
+        $fim = Carbon::parse($dataFim)->endOfDay();
+
+        return AuditoriaLog::with('usuario')
+            ->whereBetween('created_at', [$inicio, $fim])
+            ->orderBy('created_at', 'desc')
             ->get();
     }
 

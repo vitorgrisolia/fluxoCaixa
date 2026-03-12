@@ -20,7 +20,7 @@ Aplicacao web em Laravel 9 para controle financeiro e operacional, com autentica
 O projeto centraliza dois contextos:
 
 - Financeiro: controle de lancamentos (entradas e saidas), tipos e centros de custo.
-- Operacional: cadastro e consulta de produtos, com simulacao de finalizacao de compra.
+- Operacional: cadastro e consulta de produtos, com finalizacao de compra e registro de vendas.
 
 O acesso e segregado por tipo de usuario:
 
@@ -70,6 +70,25 @@ O acesso e segregado por tipo de usuario:
 - resumo de valor de venda (saidas)
 - estoque atual por produto com valor de venda
 
+6. Fechamento de caixa:
+- visualizacao de fechamentos por funcionario
+- saldo final consolidado
+
+7. Relatorios:
+- visao geral por periodo
+- resumo por centro de custo e por tipo
+- exportacao CSV e PDF
+- opcao de incluir auditoria e fechamento no relatorio
+
+8. Configuracoes gerais do sistema:
+- nome do sistema, dados da empresa e mensagem de rodape
+
+9. Auditoria e logs:
+- registro de acessos e alteracoes com data/hora e descricao
+
+10. Perfil:
+- atualizar dados e senha sem depender de outro admin
+
 ### Funcionario
 
 1. Leitor de produtos:
@@ -93,8 +112,17 @@ O acesso e segregado por tipo de usuario:
 - calculo do valor por parcela na tela
 - ao confirmar, sistema retorna mensagem de sucesso
 
-Observacao: atualmente a finalizacao de compra nao gera pedido persistido em tabela propria.
+3. Historico de compras:
+- CRUD de compras realizadas pelo funcionario
 
+4. Fechamento de caixa:
+- registra fundo de caixa e totais por forma de pagamento
+- ao concluir, usuario e deslogado automaticamente
+
+5. Perfil:
+- atualizar dados e senha
+
+Observacao: a finalizacao de compra gera registro na tabela `compras`.
 ## 3. Arquitetura e stack
 
 - Backend: Laravel 9 (PHP 8.2+)
@@ -102,6 +130,7 @@ Observacao: atualmente a finalizacao de compra nao gera pedido persistido em tab
 - CSS/UI: Bootstrap 5 + Tailwind (via Vite)
 - Build front-end: Vite
 - Auth: Laravel Breeze
+- PDF: barryvdh/laravel-dompdf
 - Banco: MySQL/MariaDB
 
 Controle de acesso:
@@ -167,6 +196,51 @@ Fluxo de login:
 - `data_movimentacao`
 - `observacao`
 
+7. `compras`
+- `id_compra` (PK)
+- `id_user`
+- `data_compra`
+- `valor_total`
+- `forma_pagamento`
+- `dividir_valor`
+- `parcelas`
+
+8. `fechamento_caixas`
+- `id_fechamento` (PK)
+- `id_user`
+- `data_fechamento`
+- `saldo_inicial`
+- `valor_dinheiro`
+- `valor_cartao`
+- `valor_pix`
+- `valor_outros`
+- `total_entradas`
+- `total_saidas`
+- `saldo_final`
+- `observacoes`
+
+9. `configuracoes`
+- `id_configuracao` (PK)
+- `nome_sistema`
+- `nome_empresa`
+- `email_contato`
+- `telefone_contato`
+- `endereco`
+- `moeda`
+- `mensagem_rodape`
+
+10. `auditoria_logs`
+- `id_log` (PK)
+- `id_user`
+- `acao`
+- `descricao`
+- `rota`
+- `metodo`
+- `url`
+- `ip`
+- `user_agent`
+- `dados` (json)
+
 ### Seeders incluidos
 
 - `AdminUserSeeder`
@@ -182,22 +256,33 @@ ProjetoFluxo_Caixa/
 |-- app/
 |   |-- Http/
 |   |   |-- Controllers/
+|   |   |   |-- AuditoriaController.php
 |   |   |   |-- CentroCustoController.php
 |   |   |   |-- CompraFuncionarioController.php
+|   |   |   |-- ConfiguracaoController.php
 |   |   |   |-- ControleFinanceiroController.php
 |   |   |   |-- EstoqueController.php
+|   |   |   |-- FechamentoCaixaController.php
 |   |   |   |-- HomeController.php
+|   |   |   |-- HistoricoCompraController.php
 |   |   |   |-- LancamentoController.php
+|   |   |   |-- PerfilController.php
 |   |   |   |-- ProdutoController.php
+|   |   |   |-- RelatorioController.php
 |   |   |   |-- TipoController.php
 |   |   |   `-- UsuarioController.php
 |   |   |-- Middleware/
+|   |   |   |-- AuditLogMiddleware.php
 |   |   |   |-- AdminMiddleware.php
 |   |   |   `-- FuncionarioMiddleware.php
 |   |   `-- Requests/
 |   |       `-- Auth/
 |   |-- Models/
+|   |   |-- AuditoriaLog.php
 |   |   |-- CentroCusto.php
+|   |   |-- Compra.php
+|   |   |-- ConfiguracaoSistema.php
+|   |   |-- FechamentoCaixa.php
 |   |   |-- Lancamento.php
 |   |   |-- MovimentacaoProduto.php
 |   |   |-- Produto.php
@@ -217,7 +302,13 @@ ProjetoFluxo_Caixa/
 |   |   |-- 2026_03_07_000000_add_tipo_usuario_to_users_table.php
 |   |   |-- 2026_03_07_010000_create_produtos_table.php
 |   |   |-- 2026_03_07_020000_add_lote_to_produtos_table.php
-|   |   `-- 2026_03_09_030000_create_movimentacao_produtos_table.php
+|   |   |-- 2026_03_09_030000_create_movimentacao_produtos_table.php
+|   |   |-- 2026_03_12_000000_create_fechamento_caixas_table.php
+|   |   |-- 2026_03_12_010000_create_compras_table.php
+|   |   |-- 2026_03_12_020000_add_pagamentos_to_fechamento_caixas_table.php
+|   |   |-- 2026_03_12_030000_create_configuracoes_table.php
+|   |   |-- 2026_03_12_040000_create_auditoria_logs_table.php
+|   |   `-- 2026_03_12_050000_add_descricao_to_auditoria_logs_table.php
 |   |-- sql/
 |   |   `-- produtos_teste_100.sql
 |   `-- seeders/
@@ -230,14 +321,20 @@ ProjetoFluxo_Caixa/
 |   |-- js/
 |   `-- views/
 |       |-- auth/
+|       |-- auditoria/
 |       |-- centro/
 |       |-- compra/
+|       |   `-- historico/
+|       |-- configuracoes/
 |       |-- controleFinanceiro/
 |       |-- estoque/
+|       |-- fechamentoCaixa/
 |       |-- home/
 |       |-- lancamento/
 |       |-- layouts/
+|       |-- perfil/
 |       |-- produto/
+|       |-- relatorios/
 |       |-- tipo/
 |       `-- usuario/
 |-- routes/
@@ -365,17 +462,33 @@ Funcionario:
 - `GET /controle-financeiro`
 - `GET /estoque`
 - `POST /estoque/movimentar`
+- `GET /fechamento-caixa`
+- `GET /relatorios`
+- `GET /relatorios/exportar/csv`
+- `GET /relatorios/exportar/pdf`
+- `GET /configuracoes`
+- `POST /configuracoes/atualizar`
+- `GET /auditoria`
 - `GET|POST /usuario/*`
 - `GET|POST /produto/*`
 - `GET|POST /tipo/*`
 - `GET|POST /centro-de-custo/*`
 - `GET|POST /lancamento/*`
+- `GET /perfil`
+- `POST /perfil/atualizar`
+- `POST /perfil/senha`
 
 ### Funcionario (`auth + funcionario`)
 
 - `GET /leitor-produtos`
 - `GET /leitor-produtos/finalizar-compra`
 - `POST /leitor-produtos/finalizar-compra`
+- `GET /leitor-produtos/historico`
+- `GET|POST /leitor-produtos/historico/*`
+- `GET /fechamento-caixa`
+- `GET /perfil`
+- `POST /perfil/atualizar`
+- `POST /perfil/senha`
 
 Para listar todas as rotas:
 

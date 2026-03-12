@@ -15,6 +15,7 @@ class AuditoriaLog extends Model
     protected $fillable = [
         'id_user',
         'acao',
+        'descricao',
         'rota',
         'metodo',
         'url',
