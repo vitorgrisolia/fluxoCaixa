@@ -77,6 +77,10 @@
                                 <i class="bi bi-bank"></i>
                                 Controle Financeiro
                             </a>
+                            <a class="nav-link" href="{{ route('fechamento-caixa.index') }}">
+                                <i class="bi bi-cash-stack"></i>
+                                Fechamento de Caixa
+                            </a>
                         @else
                             <a class="nav-link" href="{{ route('leitor.produtos') }}">
                                 <i class="bi bi-upc-scan"></i>
@@ -85,6 +89,10 @@
                             <a class="nav-link" href="{{ route('leitor.finalizar') }}">
                                 <i class="bi bi-cart-check-fill"></i>
                                 Finalizar compra
+                            </a>
+                            <a class="nav-link" href="{{ route('fechamento-caixa.index') }}">
+                                <i class="bi bi-cash-stack"></i>
+                                Fechamento de Caixa
                             </a>
                         @endif
                         <a class="nav-link" href="{{ route('logout') }}">

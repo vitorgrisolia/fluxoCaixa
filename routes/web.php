@@ -7,6 +7,7 @@ use App\Http\Controllers\CompraFuncionarioController;
 use App\Http\Controllers\ControleFinanceiroController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\FechamentoCaixaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LancamentoController;
 use App\Http\Controllers\ProdutoController;
@@ -179,6 +180,24 @@ Route::prefix('controle-financeiro')->middleware(['auth', 'admin'])->controller(
 {
     Route::get('/', 'index')->name('controle-financeiro.index');
 
+});
+
+/*
+|--------------------------------------------------------------------------
+| FECHAMENTO DE CAIXA
+|--------------------------------------------------------------------------
+|
+*/
+Route::prefix('fechamento-caixa')->middleware(['auth'])->controller(FechamentoCaixaController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('fechamento-caixa.index');
+    Route::get('/novo', 'create')->name('fechamento-caixa.create');
+    Route::get('/editar/{id}', 'edit')->name('fechamento-caixa.edit');
+    Route::get('/mostrar/{id}', 'show')->name('fechamento-caixa.show');
+    Route::post('/cadastrar', 'store')->name('fechamento-caixa.store');
+    Route::post('/atualizar/{id}', 'update')->name('fechamento-caixa.update');
+    Route::post('/deletar/{id}', 'destroy')->name('fechamento-caixa.destroy');
 });
 /*
 |--------------------------------------------------------------------------

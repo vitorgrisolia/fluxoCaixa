@@ -44,4 +44,58 @@
         </ul>
     </div>
 </div>
+
+<div class="col-12 mt-3">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                <h2 class="h5 mb-0">Fechamentos de Caixa Recentes</h2>
+                <a href="{{ route('fechamento-caixa.index') }}" class="btn btn-outline-secondary btn-sm">
+                    Ver todos
+                </a>
+            </div>
+
+            @if($fechamentosRecentes->isEmpty())
+                <p class="text-muted mb-0">Nenhum fechamento registrado ainda.</p>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-striped table-border table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Funcionario</th>
+                                <th>Fundo de caixa</th>
+                                <th>Dinheiro</th>
+                                <th>Cartao</th>
+                                <th>PIX</th>
+                                <th>Outros</th>
+                                <th>Saldo final</th>
+                                <th>Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($fechamentosRecentes as $fechamento)
+                                <tr>
+                                    <td>{{ \Carbon\Carbon::parse($fechamento->data_fechamento)->format('d/m/Y') }}</td>
+                                    <td>{{ optional($fechamento->usuario)->nome ?? '---' }}</td>
+                                    <td>R$ {{ number_format($fechamento->saldo_inicial, 2, ',', '.') }}</td>
+                                    <td>R$ {{ number_format($fechamento->valor_dinheiro, 2, ',', '.') }}</td>
+                                    <td>R$ {{ number_format($fechamento->valor_cartao, 2, ',', '.') }}</td>
+                                    <td>R$ {{ number_format($fechamento->valor_pix, 2, ',', '.') }}</td>
+                                    <td>R$ {{ number_format($fechamento->valor_outros, 2, ',', '.') }}</td>
+                                    <td>R$ {{ number_format($fechamento->saldo_final, 2, ',', '.') }}</td>
+                                    <td>
+                                        <a href="{{ route('fechamento-caixa.show', ['id' => $fechamento->id_fechamento]) }}" class="btn btn-dark btn-sm">
+                                            Ver
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
 @endsection

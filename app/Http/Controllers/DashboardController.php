@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lancamento;
 use App\Models\Produto;
+use App\Models\FechamentoCaixa;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -43,12 +44,19 @@ class DashboardController extends Controller
 
         $saldoMes = $totalEntradas - $totalSaidas;
 
+        $fechamentosRecentes = FechamentoCaixa::with('usuario')
+            ->orderBy('data_fechamento', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
         return view('dashboard')->with([
             'totalVencidos' => $totalVencidos,
             'totalVencendo' => $totalVencendo,
             'saldoMes' => $saldoMes,
             'inicioMes' => $inicioMes,
             'fimMes' => $fimMes,
+            'fechamentosRecentes' => $fechamentosRecentes,
         ]);
     }
 }
