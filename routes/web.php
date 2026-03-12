@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 #Controllers
 use App\Http\Controllers\CentroCustoController;
 use App\Http\Controllers\CompraFuncionarioController;
+use App\Http\Controllers\AuditoriaController;
 use App\Http\Controllers\ConfiguracaoController;
 use App\Http\Controllers\ControleFinanceiroController;
 use App\Http\Controllers\DashboardController;
@@ -213,6 +214,17 @@ Route::prefix('configuracoes')->middleware(['auth', 'admin'])->controller(Config
 {
     Route::get('/', 'index')->name('configuracoes.index');
     Route::post('/atualizar', 'update')->name('configuracoes.update');
+});
+
+/*
+|--------------------------------------------------------------------------
+| AUDITORIA / LOGS
+|--------------------------------------------------------------------------
+*/
+Route::prefix('auditoria')->middleware(['auth', 'admin'])->controller(AuditoriaController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('auditoria.index');
 });
 
 /*

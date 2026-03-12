@@ -84,6 +84,10 @@
                                 <i class="bi bi-gear-fill"></i>
                                 Configuracoes
                             </a>
+                            <a class="nav-link {{ $isRoute('auditoria.*') ? 'is-active' : '' }}" href="{{ route('auditoria.index') }}" @if($isRoute('auditoria.*')) aria-current="page" @endif>
+                                <i class="bi bi-shield-check"></i>
+                                Auditoria
+                            </a>
                             <a class="nav-link {{ $isRoute('relatorios.*') ? 'is-active' : '' }}" href="{{ route('relatorios.index') }}" @if($isRoute('relatorios.*')) aria-current="page" @endif>
                                 <i class="bi bi-graph-up-arrow"></i>
                                 Relatorios
