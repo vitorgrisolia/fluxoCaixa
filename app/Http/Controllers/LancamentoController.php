@@ -58,7 +58,7 @@ class LancamentoController extends Controller
         })->with(['centroCusto.tipo'])
             ->orderBy('dt_faturamento', 'desc')
             ->paginate(4); 
-          
+        
         return view('lancamento.index')
                     ->with(compact('lancamentos'));
     }
@@ -128,8 +128,8 @@ class LancamentoController extends Controller
     public function edit($id)
     {
         $lancamento = Lancamento::find($id);
-        $entradas = CentroCusto::where('id_tipo',3)->orderBy('centro_custo');
-        $saidas = CentroCusto::where('id_tipo',2)->orderBy('centro_custo');
+        $entradas = CentroCusto::where('id_tipo',2)->orderBy('centro_custo');
+        $saidas = CentroCusto::where('id_tipo',1)->orderBy('centro_custo');
         
         return view('lancamento.form')
             ->with(compact('lancamento','entradas','saidas'));

@@ -23,6 +23,11 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+                $usuario = Auth::guard($guard)->user();
+                if ($usuario && $usuario->tipo_usuario === 'funcionario') {
+                    return redirect()->route('leitor.produtos');
+                }
+
                 return redirect(RouteServiceProvider::HOME);
             }
         }

@@ -23,4 +23,9 @@ class Produto extends Model
         'preco_compra',
         'preco_venda',
     ];
+
+    public function movimentacoes()
+    {
+        return $this->hasMany(MovimentacaoProduto::class, 'id_produto', 'id_produto');
+    }
 }

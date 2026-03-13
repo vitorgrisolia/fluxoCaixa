@@ -4,9 +4,18 @@ use Illuminate\Support\Facades\Route;
 #Controllers
 use App\Http\Controllers\CentroCustoController;
 use App\Http\Controllers\CompraFuncionarioController;
+use App\Http\Controllers\AuditoriaController;
+use App\Http\Controllers\ConfiguracaoController;
+use App\Http\Controllers\ControleFinanceiroController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\FechamentoCaixaController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HistoricoCompraController;
 use App\Http\Controllers\LancamentoController;
+use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ProdutoController;
+use App\Http\Controllers\RelatorioController;
 use App\Http\Controllers\TipoController;
 use App\Http\Controllers\UsuarioController;
 
@@ -41,20 +50,16 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 | DASHBOARD
 |--------------------------------------------------------------------------
-| Thomas Melo - 19-09-2022
+| 
 */
 Route::prefix('dashboard')
     ->middleware(['auth', 'admin'])
     ->group( function(){
-        Route::get('/', function () { 
-            return view('dashboard');
-        })->name('dashboard');
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
 });
 
-/*
-Kaue Castelani -HOME 29/11/2022
-*/
+
 Route::prefix('home')->middleware(['auth', 'admin'])->controller(HomeController::class)
 ->group(function ()
 {
@@ -97,6 +102,23 @@ Route::prefix('leitor-produtos')->middleware(['auth', 'funcionario'])->controlle
 
 /*
 |--------------------------------------------------------------------------
+| HISTORICO DE COMPRAS (FUNCIONARIO)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('leitor-produtos/historico')->middleware(['auth', 'funcionario'])->controller(HistoricoCompraController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('leitor.historico.index');
+    Route::get('/novo', 'create')->name('leitor.historico.create');
+    Route::get('/editar/{id}', 'edit')->name('leitor.historico.edit');
+    Route::get('/mostrar/{id}', 'show')->name('leitor.historico.show');
+    Route::post('/cadastrar', 'store')->name('leitor.historico.store');
+    Route::post('/atualizar/{id}', 'update')->name('leitor.historico.update');
+    Route::post('/deletar/{id}', 'destroy')->name('leitor.historico.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
 | PRODUTOS (ADMIN)
 |--------------------------------------------------------------------------
 */
@@ -111,14 +133,20 @@ Route::prefix('produto')->middleware(['auth', 'admin'])->controller(ProdutoContr
     Route::post('/deletar/{id}', 'destroy')-> name('produto.delete');
 });
 
-
 /*
 |--------------------------------------------------------------------------
-| TIPOS
+| ESTOQUE / MOVIMENTACOES DE PRODUTO (ADMIN)
 |--------------------------------------------------------------------------
-| Thomas Melo - 19-09-2022
 */
-//Metodo Prefixo Facilitar Rotas, Middleware(Definir Tipos de Acesso), Quando uso o prefixo, utilizar GROUP de rotas
+Route::prefix('estoque')->middleware(['auth', 'admin'])->controller(EstoqueController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->               name('estoque.index');
+    Route::post('/movimentar', 'store')->    name('estoque.store');
+});
+
+
+
 Route::prefix('tipo')->middleware(['auth', 'admin'])->controller(TipoController::class)
 ->group(function ()
 {
@@ -134,7 +162,6 @@ Route::prefix('tipo')->middleware(['auth', 'admin'])->controller(TipoController:
 |--------------------------------------------------------------------------
 | CENTRO DE CUSTO
 |--------------------------------------------------------------------------
-| Thomas Melo - 19-09-2022
 */
 Route::prefix('centro-de-custo')->middleware(['auth', 'admin'])->controller(CentroCustoController::class)
 ->group(function ()
@@ -151,7 +178,7 @@ Route::prefix('centro-de-custo')->middleware(['auth', 'admin'])->controller(Cent
 |--------------------------------------------------------------------------
 | LANÇAMENTOS
 |--------------------------------------------------------------------------
-| Thomas Melo - 19-09-2022
+|
 */
 Route::prefix('lancamento')->middleware(['auth', 'admin'])->controller(LancamentoController::class)
 ->group(function ()
@@ -166,10 +193,83 @@ Route::prefix('lancamento')->middleware(['auth', 'admin'])->controller(Lancament
 });
 /*
 |--------------------------------------------------------------------------
+| Controle Financeiro
+|--------------------------------------------------------------------------
+|
+*/
+Route::prefix('controle-financeiro')->middleware(['auth', 'admin'])->controller(ControleFinanceiroController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('controle-financeiro.index');
+
+});
+
+/*
+|--------------------------------------------------------------------------
+| CONFIGURACOES GERAIS
+|--------------------------------------------------------------------------
+*/
+Route::prefix('configuracoes')->middleware(['auth', 'admin'])->controller(ConfiguracaoController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('configuracoes.index');
+    Route::post('/atualizar', 'update')->name('configuracoes.update');
+});
+
+/*
+|--------------------------------------------------------------------------
+| AUDITORIA / LOGS
+|--------------------------------------------------------------------------
+*/
+Route::prefix('auditoria')->middleware(['auth', 'admin'])->controller(AuditoriaController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('auditoria.index');
+});
+
+/*
+|--------------------------------------------------------------------------
+| FECHAMENTO DE CAIXA
+|--------------------------------------------------------------------------
+|
+*/
+Route::prefix('fechamento-caixa')->middleware(['auth'])->controller(FechamentoCaixaController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('fechamento-caixa.index');
+    Route::get('/novo', 'create')->name('fechamento-caixa.create');
+    Route::get('/editar/{id}', 'edit')->name('fechamento-caixa.edit');
+    Route::get('/mostrar/{id}', 'show')->name('fechamento-caixa.show');
+    Route::post('/cadastrar', 'store')->name('fechamento-caixa.store');
+    Route::post('/atualizar/{id}', 'update')->name('fechamento-caixa.update');
+    Route::post('/deletar/{id}', 'destroy')->name('fechamento-caixa.destroy');
+});
+/*
+|--------------------------------------------------------------------------
 | RELATORIOS
 |--------------------------------------------------------------------------
-| Thomas Melo - 19-09-2022
+| 
 */
+Route::prefix('relatorios')->middleware(['auth', 'admin'])->controller(RelatorioController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('relatorios.index');
+    Route::get('/exportar/csv', 'exportCsv')->name('relatorios.export.csv');
+    Route::get('/exportar/pdf', 'exportPdf')->name('relatorios.export.pdf');
+});
+
+/*
+|--------------------------------------------------------------------------
+| PERFIL (ADMIN E FUNCIONARIO)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('perfil')->middleware(['auth'])->controller(PerfilController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('perfil.index');
+    Route::post('/atualizar', 'update')->name('perfil.update');
+    Route::post('/senha', 'updatePassword')->name('perfil.password');
+});
 
 
 

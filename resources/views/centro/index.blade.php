@@ -2,11 +2,11 @@
 
 @section('conteudo')
     
-    <h1><i class="bi bi-basket-fill"></i>
-        Centros de Custo
+    <h1><i class="h3 bi bi-basket-fill"> Centros de Custo</i>
+    
     </h1>
-    -
-    <a href="{{ route('centro.create') }}" class="btn btn-dark">
+    
+    <a href="{{ route('centro.create') }}" class="btn btn-dark mb-3 mt-3">
         Novo
     </a>
 

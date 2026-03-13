@@ -2,9 +2,8 @@
 
 @section('conteudo')
 <div class="col-md-12">
-    <h1>
-        <i class="bi bi-box-seam"></i>
-        Cadastro de Produtos
+    <h1 class="mb-4">
+        <i class="h3 bi bi-box-seam">Cadastro de Produtos</i>
     </h1>
 
     @if (session('success'))
@@ -30,7 +29,7 @@
     @endphp
 
     @if ($isAdmin)
-        <a href="{{ route('produto.create') }}" class="btn btn-dark">
+        <a href="{{ route('produto.create') }}" class="btn btn-dark mb-3 mt-3">
             Novo produto
         </a>
     @endif

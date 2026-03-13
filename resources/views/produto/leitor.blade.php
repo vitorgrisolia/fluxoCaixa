@@ -3,11 +3,10 @@
 @section('conteudo')
 <div class="col-md-12">
     <h1>
-        <i class="bi bi-upc-scan"></i>
-        Leitor de Produtos
+        <i class="h3 bi bi-upc-scan">Leitor de Produtos</i>
     </h1>
 
-    <div class="alert alert-info">
+    <div class="alert alert-info mt-3">
         Valor total para compra: <strong>R$ {{ number_format($totalCompra, 2, ',', '.') }}</strong>
     </div>
 

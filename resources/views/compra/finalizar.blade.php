@@ -3,8 +3,7 @@
 @section('conteudo')
 <div class="col-md-10">
     <h1>
-        <i class="bi bi-cart-check-fill"></i>
-        Finalizar compra
+        <i class="h3 bi bi-cart-check-fill">Finalizar compra</i>
     </h1>
 
     @if (session('success'))
@@ -24,7 +23,7 @@
         </div>
     @endif
 
-    <div class="card">
+    <div class="card mt-3">
         <div class="card-body">
             <form action="{{ route('leitor.finalizar.store') }}" method="post">
                 @csrf

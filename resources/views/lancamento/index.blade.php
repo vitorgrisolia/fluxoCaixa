@@ -2,29 +2,28 @@
 
 @section('conteudo')
 <div class="col-md-12">
-    <h1><i class="bi bi-basket-fill"></i>
-        Lançamentos
-        --
+    <h1><i class="h3 bi bi-basket-fill">Lançamentos</i>
+        <hr>
         <h2>
             <hr>
-            <strong>Usuário: {{ Auth::user()->nome}}</strong>
-            <br>
-            <strong>Total de Lançamentos: {{ $lancamentos->count() }}</strong>
-            <br>
-            <strong>Total: R$ {{$lancamentos->sum('valor')}}</strong>
+                <strong>Usuário: {{ Auth::user()->nome}}</strong>
+                <br>
+                <strong>Total de Lançamentos: {{ $lancamentos->count() }}</strong>
+                <br>
+                <strong>Total: R$ {{$lancamentos->sum('valor')}}</strong>
             <hr>
             
         </h2>
     </h1>
 </div>   
-    <a href="{{ route('lancamento.create') }}" class="btn btn-dark">
+    <a href="{{ route('lancamento.create') }}" class="btn btn-dark mb-3 mt-3">
         Novo
     </a>
 <hr>
     {{-- Formulário de Pesquisa --}}
     <form action="{{ route('lancamento.index') }}" method="get">
         @csrf
-        <div class="row">
+        <div class="row mb-3 mt-3">
             <div class="col-md-3">
                 <input type="text" name="pesquisar" id="pesquisar" value="{{ old('pesquisar') }}" placeholder="Digite o termo a ser pesquisado..." class="form-control">
             </div>
@@ -66,7 +65,7 @@
                         <a href="{{ route('lancamento.edit', ['id'=>$lancamento->id_lancamento]) }}" class="btn btn-success">
                             Editar
                         </a>
-                        <a href="{{ route('lancamento.destroy', ['id'=>$lancamento->id_lancamento]) }}" class="btn btn-danger">
+                        <a href="{{ route('lancamento.destroy', ['id'=>$lancamento->id_lancamento]) }}" class="btn btn-danger mt-2">
                             Excluir
                         </a>
                     </td>

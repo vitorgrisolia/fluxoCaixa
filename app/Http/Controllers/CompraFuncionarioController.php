@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Compra;
 use App\Models\Produto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CompraFuncionarioController extends Controller
@@ -23,6 +25,19 @@ class CompraFuncionarioController extends Controller
             'parcelas' => ['nullable', 'integer', 'min:1', 'max:12', 'required_if:dividir_valor,sim'],
         ]);
 
+        $totalCompra = Produto::sum(DB::raw('preco_compra * quantidade'));
+
+        $compra = new Compra();
+        $compra->fill([
+            'data_compra' => now(),
+            'valor_total' => $totalCompra,
+            'forma_pagamento' => $dados['forma_pagamento'],
+            'dividir_valor' => $dados['dividir_valor'],
+            'parcelas' => $dados['dividir_valor'] === 'sim' ? (int) ($dados['parcelas'] ?? 1) : null,
+        ]);
+        $compra->id_user = Auth::user()->id_user;
+        $compra->save();
+
         $formas = [
             'pix' => 'PIX',
             'dinheiro' => 'Dinheiro',
@@ -36,7 +51,6 @@ class CompraFuncionarioController extends Controller
         $mensagem = "Compra finalizada com sucesso. Forma de pagamento: {$formaSelecionada}.";
 
         if ($dados['dividir_valor'] === 'sim' && !empty($dados['parcelas'])) {
-            $totalCompra = Produto::sum(DB::raw('preco_compra * quantidade'));
             $valorParcela = $totalCompra / (int) $dados['parcelas'];
 
             $mensagem .= " Pagamento dividido em {$dados['parcelas']}x de R$ ".number_format($valorParcela, 2, ',', '.').".";

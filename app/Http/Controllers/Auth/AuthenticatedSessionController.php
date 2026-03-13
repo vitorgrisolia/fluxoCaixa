@@ -31,6 +31,7 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+        $request->session()->put('login_at', now()->toDateTimeString());
 
         $usuario = Auth::user();
         if ($usuario->tipo_usuario === 'admin') {
