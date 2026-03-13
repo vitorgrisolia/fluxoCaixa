@@ -2,8 +2,8 @@
 
 @section('conteudo')
     
-    <h1>Tipos de Lançamentos</h1>
-    -
+    <h1 class="h3 bi bi-box-arrow-in-down">Tipos de Lançamentos</h1>
+    <hr>
     <a href="{{ route('tipo.create') }}" class="btn btn-dark mb-3 mt-3">
         Novo
     </a>

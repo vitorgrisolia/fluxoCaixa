@@ -3,8 +3,7 @@
 @section('conteudo')
 <div class="col-12">
     <h1>
-        <i class="bi bi-clock-history"></i>
-        Historico de compras
+        <i class="h3 bi bi-clock-history">Historico de compras</i>
     </h1>
 
     @if (session('success'))

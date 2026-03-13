@@ -3,8 +3,8 @@
 @section('conteudo')
 <div class="col-12">
     <h1>
-        <i class="bi bi-cash-stack"></i>
-        Fechamento de Caixa
+        <i class="h3 bi bi-cash-stack">Fechamento de Caixa</i>
+        
     </h1>
 
     @php

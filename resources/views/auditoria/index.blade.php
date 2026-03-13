@@ -3,8 +3,7 @@
 @section('conteudo')
 <div class="col-12">
     <h1>
-        <i class="bi bi-shield-check"></i>
-        Auditoria e Logs
+        <i class="h3 bi bi-shield-check">Auditoria e Logs</i>
     </h1>
 
     <form action="{{ route('auditoria.index') }}" method="get" class="row g-2 align-items-end mb-3">

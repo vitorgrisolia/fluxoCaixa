@@ -3,8 +3,7 @@
 @section('conteudo')
 <div class="col-12">
     <h1>
-        <i class="bi bi-graph-up-arrow"></i>
-        Relatorios - Visao geral por periodo
+        <i class="h3 bi bi-graph-up-arrow"> Relatórios</i>
     </h1>
 
     @php

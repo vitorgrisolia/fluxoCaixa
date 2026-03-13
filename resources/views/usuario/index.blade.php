@@ -3,8 +3,8 @@
 @section('conteudo')
 <div class="col-md-12">
     <h1>
-        <i class="bi bi-people-fill"></i>
-        Cadastro de Usuarios
+        <i class="h3 bi bi-people-fill">Cadastro de Usuarios</i>
+        
     </h1>
 
     @if (session('success'))

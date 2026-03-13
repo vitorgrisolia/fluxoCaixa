@@ -3,8 +3,7 @@
 @section('conteudo')
 <div class="col-md-12">
     <h1 class="mb-4">
-        <i class="bi bi-box-seam"></i>
-        Cadastro de Produtos
+        <i class="h3 bi bi-box-seam">Cadastro de Produtos</i>
     </h1>
 
     @if (session('success'))

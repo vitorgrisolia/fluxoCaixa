@@ -3,8 +3,7 @@
 @section('conteudo')
 <div class="col-12">
     <h1>
-        <i class="bi bi-person-circle"></i>
-        Meu perfil
+        <i class="h3 bi bi-person-circle">Meu perfil</i>
     </h1>
 
     @if (session('success'))
@@ -24,7 +23,7 @@
         </div>
     @endif
 
-    <div class="row g-3">
+    <div class="row g-3 mt-2">
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">

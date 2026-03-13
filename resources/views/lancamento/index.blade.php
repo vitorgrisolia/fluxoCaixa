@@ -2,16 +2,15 @@
 
 @section('conteudo')
 <div class="col-md-12">
-    <h1><i class="bi bi-basket-fill"></i>
-        Lançamentos
-        --
+    <h1><i class="h3 bi bi-basket-fill">Lançamentos</i>
+        <hr>
         <h2>
             <hr>
-            <strong>Usuário: {{ Auth::user()->nome}}</strong>
-            <br>
-            <strong>Total de Lançamentos: {{ $lancamentos->count() }}</strong>
-            <br>
-            <strong>Total: R$ {{$lancamentos->sum('valor')}}</strong>
+                <strong>Usuário: {{ Auth::user()->nome}}</strong>
+                <br>
+                <strong>Total de Lançamentos: {{ $lancamentos->count() }}</strong>
+                <br>
+                <strong>Total: R$ {{$lancamentos->sum('valor')}}</strong>
             <hr>
             
         </h2>

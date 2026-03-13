@@ -3,8 +3,7 @@
 @section('conteudo')
 <div class="col-12">
     <h1>
-        <i class="bi bi-gear-fill"></i>
-        Configuracoes gerais do sistema
+        <i class="h3 bi bi-gear-fill"> Configurações de sistema</i>
     </h1>
 
     @if (session('success'))
@@ -24,7 +23,7 @@
         </div>
     @endif
 
-    <div class="card border-0 shadow-sm">
+    <div class="card border-0 shadow-sm mt-3">
         <div class="card-body">
             <form action="{{ route('configuracoes.update') }}" method="post">
                 @csrf

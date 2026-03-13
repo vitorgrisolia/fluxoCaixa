@@ -1,7 +1,7 @@
 @extends('layouts.base')
 @section('conteudo')
 <div>
-<h1 class="mb-4">Controle Financeiro</h1>
+<h1 class="h3 mb-4 bi bi-currency-dollar">Controle Financeiro</h1>
 
 <form action="{{ route('controle-financeiro.index') }}" method="GET">
     <div class="form-group">
