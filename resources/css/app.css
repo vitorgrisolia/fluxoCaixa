@@ -29,9 +29,9 @@ body.app-body {
     font-family: "Space Grotesk", "Segoe UI", sans-serif;
     color: var(--ink-900);
     background:
-        radial-gradient(1200px 600px at 10% -10%, rgba(97, 244, 100, 0.475), transparent 60%),
-        radial-gradient(900px 500px at 90% -20%, rgba(55, 107, 252, 0.83), transparent 55%),
-        linear-gradient(120deg, #26268a, #5373cd);
+        radial-gradient(1200px 600px at 10% -10%, rgba(0, 245, 4, 0.933), transparent 60%),
+        radial-gradient(900px 500px at 90% -20%, rgba(2, 66, 244, 0.83), transparent 55%),
+        linear-gradient(120deg, #3d3d90, #0043fd);
     min-height: 100vh;
 }
 
@@ -134,9 +134,9 @@ h3,
 }
 
 .card {
-    border: 1px solid rgba(226, 232, 240, 0.9);
+    border: 5px solid rgba(226, 232, 240, 0.9);
     border-radius: 20px;
-    box-shadow: var(--shadow-2);
+    box-shadow: insert 0 0 10px #000000;
     background: rgba(255, 255, 255, 0.92);
 }
 

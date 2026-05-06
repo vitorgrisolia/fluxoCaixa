@@ -1,0 +1,52 @@
+# Render Blueprint
+# Deploys the Laravel app as a Docker web service + managed Postgres.
+services:
+  - type: web
+    name: fluxo-caixa-app
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: /login
+    envVars:
+      - key: APP_NAME
+        value: Sistema_Grisolia
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: FILESYSTEM_DISK
+        value: public
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: fluxo-caixa-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: fluxo-caixa-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: fluxo-caixa-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: fluxo-caixa-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: fluxo-caixa-db
+          property: password
+      # Optional: set to true only for the first deploy if you want seeders.
+      - key: RUN_DB_SEED
+        value: "false"
+
+databases:
+  - name: fluxo-caixa-db
+    plan: free
