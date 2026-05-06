@@ -14,6 +14,7 @@ Aplicacao web em Laravel 9 para controle financeiro e operacional, com autentica
 - [8. Rotas principais](#8-rotas-principais)
 - [9. SQL util](#9-sql-util)
 - [10. Troubleshooting](#10-troubleshooting)
+- [11. Deploy no Render](#11-deploy-no-render)
 
 ## 1. Objetivo do sistema
 
@@ -606,3 +607,18 @@ Se necessario:
 composer dump-autoload
 php artisan optimize:clear
 ```
+
+## 11. Deploy no Render
+
+O projeto foi preparado para deploy no Render via Docker.
+
+Arquivos adicionados para deploy:
+
+- `Dockerfile`
+- `.dockerignore`
+- `render.yaml`
+- `scripts/00-laravel-deploy.sh`
+
+Passo a passo completo:
+
+- veja [`DEPLOY_RENDER.md`](DEPLOY_RENDER.md)
