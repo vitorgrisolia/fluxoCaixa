@@ -15,6 +15,7 @@ Aplicacao web em Laravel 9 para controle financeiro e operacional, com autentica
 - [9. SQL util](#9-sql-util)
 - [10. Troubleshooting](#10-troubleshooting)
 - [11. Deploy no Render](#11-deploy-no-render)
+- [12. Seguranca, Backup e API (v2)](#12-seguranca-backup-e-api-v2)
 
 ## 1. Objetivo do sistema
 
@@ -622,3 +623,106 @@ Arquivos adicionados para deploy:
 Passo a passo completo:
 
 - veja [`DEPLOY_RENDER.md`](DEPLOY_RENDER.md)
+
+## 12. Seguranca, Backup e API (v2)
+
+Melhorias implementadas nesta versao:
+
+1. Permissoes granulares por chave (ex.: `pdv.vender`, `produto.definir_preco`).
+2. Auditoria detalhada com `dados_antes` e `dados_depois` por alteracao de modelo.
+3. Backup automatico com comando agendado e teste de restauracao.
+4. API v1 com token Sanctum para integracoes futuras.
+
+### 12.1 Subir as melhorias no ambiente (passo a passo)
+
+1. Rodar migrations novas:
+
+```bash
+php artisan migrate
+```
+
+2. Validar rotas web/API:
+
+```bash
+php artisan route:list
+```
+
+3. (Opcional) Ajustar permissao individual de usuario:
+
+```bash
+php artisan permission:user 2 produto.definir_preco deny
+php artisan permission:user 2 pdv.vender allow
+php artisan permission:user 2 pdv.cadastro_rapido allow
+```
+
+Acao aceita no comando: `allow`, `deny` ou `clear`.
+
+### 12.2 Regras de permissao (resumo)
+
+- Middleware novo: `permission:<chave>`.
+- Defaults por perfil ficam em `config/permissions.php`.
+- Overrides por usuario ficam na tabela `user_permissoes`.
+- Exemplo de regra: funcionario pode vender (`pdv.vender`), mas sem permissao de editar preco (`produto.definir_preco`).
+
+### 12.3 Auditoria detalhada
+
+Tabela `auditoria_logs` agora registra:
+
+- `origem` (`middleware` ou `observer`)
+- `entidade` / `entidade_id`
+- `dados_antes`
+- `dados_depois`
+
+Tela: `GET /auditoria` (com filtros por origem e entidade).
+
+### 12.4 Backup e restauracao
+
+Gerar backup:
+
+```bash
+php artisan backup:database
+```
+
+Testar restauracao sem impactar banco principal:
+
+```bash
+php artisan backup:test-restore
+```
+
+Restaurar backup (acao destrutiva, exige confirmacao):
+
+```bash
+php artisan backup:restore backup_mysql_YYYYMMDD_HHMMSS.sql --force
+```
+
+Agendamento diario:
+
+- `app/Console/Kernel.php` roda `backup:database` diariamente as `02:30`.
+
+Variaveis novas no `.env`:
+
+- `BACKUP_DIRECTORY=backups/database`
+- `BACKUP_RETENTION_DAYS=7`
+
+### 12.5 API v1 para integracoes
+
+Base: `/api/v1`
+
+Principais endpoints:
+
+- `POST /api/v1/auth/token`
+- `DELETE /api/v1/auth/token`
+- `GET /api/v1/produtos`
+- `POST /api/v1/produtos`
+- `POST /api/v1/produtos/{idProduto}/estoque`
+- `GET /api/v1/vendas`
+- `GET /api/v1/vendas/resumo`
+- `POST /api/v1/vendas`
+
+Exemplo rapido (gerar token):
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/auth/token \
+  -H "Content-Type: application/json" \
+  -d "{\"email\":\"admin@example.com\",\"password\":\"senha_admin\",\"token_name\":\"erp\"}"
+```

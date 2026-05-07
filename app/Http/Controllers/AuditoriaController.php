@@ -34,6 +34,14 @@ class AuditoriaController extends Controller
             $query->where('rota', 'like', '%'.$request->rota.'%');
         }
 
+        if ($request->filled('entidade')) {
+            $query->where('entidade', 'like', '%'.$request->entidade.'%');
+        }
+
+        if ($request->filled('origem')) {
+            $query->where('origem', $request->origem);
+        }
+
         $logs = $query->paginate(20)->appends($request->query());
         $usuarios = User::orderBy('nome')->get();
 

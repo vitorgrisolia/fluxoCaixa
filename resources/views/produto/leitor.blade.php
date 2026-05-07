@@ -1,6 +1,9 @@
 @extends('layouts.base')
 
 @section('conteudo')
+@php
+    $podeDefinirPrecoRapido = auth()->user() && auth()->user()->possuiPermissao('produto.definir_preco');
+@endphp
 <div class="col-md-12">
     <h1>
         <i class="h3 bi bi-upc-scan">Leitor de Produtos</i>
@@ -188,7 +191,11 @@
                         id="preco_venda_rapido"
                         class="form-control"
                         value="{{ old('preco_venda', 0) }}"
+                        {{ $podeDefinirPrecoRapido ? '' : 'readonly' }}
                     >
+                    @if (! $podeDefinirPrecoRapido)
+                        <small class="text-muted">Sem permissao para editar preco. O sistema usara o preco de compra.</small>
+                    @endif
                 </div>
                 <div class="col-md-2">
                     <label for="adicionar_ao_leitor_rapido" class="form-label">Adicionar no leitor</label>

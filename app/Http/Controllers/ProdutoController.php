@@ -7,6 +7,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class ProdutoController extends Controller
@@ -239,7 +240,13 @@ class ProdutoController extends Controller
         $loteInformado = trim((string) ($dados['lote'] ?? ''));
         $codigoBarras = trim((string) $dados['codigo_barras']);
         $precoCompra = (float) $dados['preco_compra'];
-        $precoVenda = isset($dados['preco_venda']) ? (float) $dados['preco_venda'] : $precoCompra;
+        $usuario = Auth::user();
+        $podeDefinirPreco = $usuario && method_exists($usuario, 'possuiPermissao')
+            ? $usuario->possuiPermissao('produto.definir_preco')
+            : false;
+        $precoVenda = $podeDefinirPreco && isset($dados['preco_venda'])
+            ? (float) $dados['preco_venda']
+            : $precoCompra;
 
         $produto = Produto::create([
             'nome' => trim((string) $dados['nome']),
@@ -266,8 +273,13 @@ class ProdutoController extends Controller
             $request->session()->put(self::LEITOR_SESSION_KEY, $selecao->all());
         }
 
+        $mensagem = "Produto {$produto->nome} cadastrado rapidamente no PDV com sucesso.";
+        if (! $podeDefinirPreco) {
+            $mensagem .= ' Preco de venda definido automaticamente por falta de permissao para editar preco.';
+        }
+
         return redirect()->route('leitor.produtos', ['filtro' => $dados['filtro_retorno'] ?? $codigoBarras])
-            ->with('success', "Produto {$produto->nome} cadastrado rapidamente no PDV com sucesso.");
+            ->with('success', $mensagem);
     }
 
     public function importarLote(Request $request)

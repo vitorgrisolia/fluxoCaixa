@@ -16,16 +16,23 @@ class AuditoriaLog extends Model
         'id_user',
         'acao',
         'descricao',
+        'origem',
         'rota',
         'metodo',
         'url',
         'ip',
         'user_agent',
+        'entidade',
+        'entidade_id',
         'dados',
+        'dados_antes',
+        'dados_depois',
     ];
 
     protected $casts = [
         'dados' => 'array',
+        'dados_antes' => 'array',
+        'dados_depois' => 'array',
     ];
 
     public function usuario()

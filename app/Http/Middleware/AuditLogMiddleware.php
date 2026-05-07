@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\AuditoriaLog;
+use App\Support\Auditoria\AuditLogger;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,17 +35,14 @@ class AuditLogMiddleware
         $acao = $this->resolverAcao($request, $rota);
         $descricao = $this->resolverDescricao($request, $rota, $acao);
 
-        AuditoriaLog::create([
-            'id_user' => $usuario->id_user,
-            'acao' => $acao,
-            'descricao' => $descricao,
-            'rota' => $rota,
-            'metodo' => $request->method(),
-            'url' => substr((string) $request->path(), 0, 255),
-            'ip' => $request->ip(),
-            'user_agent' => substr((string) $request->userAgent(), 0, 255),
-            'dados' => $this->filtrarDados($request->all()),
-        ]);
+        AuditLogger::logRequest(
+            $request,
+            $usuario->id_user,
+            $acao,
+            $descricao,
+            $rota,
+            $request->all()
+        );
 
         return $response;
     }
@@ -151,53 +148,5 @@ class AuditLogMiddleware
         }
 
         return "rota {$rota}";
-    }
-
-    private function filtrarDados(array $dados): array
-    {
-        $bloqueados = ['password', 'senha', 'nova_senha', 'senha_atual', 'token', '_token'];
-
-        $filtrados = [];
-        foreach ($dados as $chave => $valor) {
-            $chaveLower = strtolower((string) $chave);
-            $bloquear = false;
-            foreach ($bloqueados as $item) {
-                if (str_contains($chaveLower, $item)) {
-                    $bloquear = true;
-                    break;
-                }
-            }
-
-            if ($bloquear) {
-                $filtrados[$chave] = '[oculto]';
-                continue;
-            }
-
-            if (is_array($valor)) {
-                $filtrados[$chave] = $this->sanitizarArray($valor);
-            } elseif (is_object($valor)) {
-                $filtrados[$chave] = '[objeto]';
-            } else {
-                $filtrados[$chave] = (string) $valor;
-            }
-        }
-
-        return $filtrados;
-    }
-
-    private function sanitizarArray(array $valores): array
-    {
-        $resultado = [];
-        foreach ($valores as $chave => $valor) {
-            if (is_array($valor)) {
-                $resultado[$chave] = $this->sanitizarArray($valor);
-            } elseif (is_object($valor)) {
-                $resultado[$chave] = '[objeto]';
-            } else {
-                $resultado[$chave] = (string) $valor;
-            }
-        }
-
-        return $resultado;
     }
 }

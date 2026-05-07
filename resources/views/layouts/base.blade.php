@@ -40,7 +40,13 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 @php
-                    $isAdmin = Auth::user()->tipo_usuario === 'admin';
+                    $usuarioLogado = Auth::user();
+                    $isAdmin = $usuarioLogado->tipo_usuario === 'admin';
+                    $can = function ($permission) use ($usuarioLogado) {
+                        return method_exists($usuarioLogado, 'possuiPermissao')
+                            ? $usuarioLogado->possuiPermissao($permission)
+                            : false;
+                    };
                     $isRoute = function ($patterns) {
                         return request()->routeIs((array) $patterns);
                     };
@@ -48,10 +54,12 @@
                 <div class="collapse navbar-collapse ml-3" id="navbarNavFluxo">
                     <div class="navbar-nav">
                         @if($isAdmin)
-                            <a class="nav-link {{ $isRoute('home.*') ? 'is-active' : '' }}" href="{{ route('home.index') }}" @if($isRoute('home.*')) aria-current="page" @endif>
-                                <i class="bi bi-house-door-fill ml-3"></i>
-                                Home
-                            </a>
+                            @if($can('dashboard.visualizar'))
+                                <a class="nav-link {{ $isRoute('home.*') ? 'is-active' : '' }}" href="{{ route('home.index') }}" @if($isRoute('home.*')) aria-current="page" @endif>
+                                    <i class="bi bi-house-door-fill ml-3"></i>
+                                    Home
+                                </a>
+                            @endif
                             <a class="nav-link {{ $isRoute('lancamento.*') ? 'is-active' : '' }}" href="{{ route('lancamento.index') }}" @if($isRoute('lancamento.*')) aria-current="page" @endif>
                                 <i class="bi bi-piggy-bank-fill"></i>
                                 Lancamentos
@@ -64,63 +72,89 @@
                                 <i class="bi bi-arrow-down-up"></i>
                                 Tipos
                             </a>
-                            <a class="nav-link {{ $isRoute('usuario.*') ? 'is-active' : '' }}" href="{{ route('usuario.index') }}" @if($isRoute('usuario.*')) aria-current="page" @endif>
-                                <i class="bi bi-people-fill"></i>
-                                Usuarios
-                            </a>
-                            <a class="nav-link {{ $isRoute('produto.*') ? 'is-active' : '' }}" href="{{ route('produto.index') }}" @if($isRoute('produto.*')) aria-current="page" @endif>
-                                <i class="bi bi-box-seam"></i>
-                                Produtos
-                            </a>
-                            <a class="nav-link {{ $isRoute('estoque.*') ? 'is-active' : '' }}" href="{{ route('estoque.index') }}" @if($isRoute('estoque.*')) aria-current="page" @endif>
-                                <i class="bi bi-clipboard2-data"></i>
-                                Controle de Estoque
-                            </a>
+                            @if($can('usuario.gerenciar'))
+                                <a class="nav-link {{ $isRoute('usuario.*') ? 'is-active' : '' }}" href="{{ route('usuario.index') }}" @if($isRoute('usuario.*')) aria-current="page" @endif>
+                                    <i class="bi bi-people-fill"></i>
+                                    Usuarios
+                                </a>
+                            @endif
+                            @if($can('produto.visualizar'))
+                                <a class="nav-link {{ $isRoute('produto.*') ? 'is-active' : '' }}" href="{{ route('produto.index') }}" @if($isRoute('produto.*')) aria-current="page" @endif>
+                                    <i class="bi bi-box-seam"></i>
+                                    Produtos
+                                </a>
+                            @endif
+                            @if($can('estoque.visualizar'))
+                                <a class="nav-link {{ $isRoute('estoque.*') ? 'is-active' : '' }}" href="{{ route('estoque.index') }}" @if($isRoute('estoque.*')) aria-current="page" @endif>
+                                    <i class="bi bi-clipboard2-data"></i>
+                                    Controle de Estoque
+                                </a>
+                            @endif
                             <a class="nav-link {{ $isRoute('controle-financeiro.*') ? 'is-active' : '' }}" href="{{ route('controle-financeiro.index') }}" @if($isRoute('controle-financeiro.*')) aria-current="page" @endif>
                                 <i class="bi bi-bank ml-3"></i>
                                 Controle Financeiro
                             </a>
-                            <a class="nav-link {{ $isRoute('configuracoes.*') ? 'is-active' : '' }}" href="{{ route('configuracoes.index') }}" @if($isRoute('configuracoes.*')) aria-current="page" @endif>
-                                <i class="bi bi-gear-fill"></i>
-                                Configuracoes
-                            </a>
-                            <a class="nav-link {{ $isRoute('auditoria.*') ? 'is-active' : '' }}" href="{{ route('auditoria.index') }}" @if($isRoute('auditoria.*')) aria-current="page" @endif>
-                                <i class="bi bi-shield-check"></i>
-                                Auditoria
-                            </a>
-                            <a class="nav-link {{ $isRoute('relatorios.*') ? 'is-active' : '' }}" href="{{ route('relatorios.index') }}" @if($isRoute('relatorios.*')) aria-current="page" @endif>
-                                <i class="bi bi-graph-up-arrow"></i>
-                                Relatorios
-                            </a>
-                            <a class="nav-link {{ $isRoute('fechamento-caixa.*') ? 'is-active' : '' }}" href="{{ route('fechamento-caixa.index') }}" @if($isRoute('fechamento-caixa.*')) aria-current="page" @endif>
-                                <i class="bi bi-cash-stack"></i>
-                                Fechamento de Caixa
-                            </a>
-                            <a class="nav-link {{ $isRoute('caixa.turno.*') ? 'is-active' : '' }}" href="{{ route('caixa.turno.index') }}" @if($isRoute('caixa.turno.*')) aria-current="page" @endif>
-                                <i class="bi bi-clock-history"></i>
-                                Turnos de Caixa
-                            </a>
+                            @if($can('configuracoes.editar'))
+                                <a class="nav-link {{ $isRoute('configuracoes.*') ? 'is-active' : '' }}" href="{{ route('configuracoes.index') }}" @if($isRoute('configuracoes.*')) aria-current="page" @endif>
+                                    <i class="bi bi-gear-fill"></i>
+                                    Configuracoes
+                                </a>
+                            @endif
+                            @if($can('auditoria.visualizar'))
+                                <a class="nav-link {{ $isRoute('auditoria.*') ? 'is-active' : '' }}" href="{{ route('auditoria.index') }}" @if($isRoute('auditoria.*')) aria-current="page" @endif>
+                                    <i class="bi bi-shield-check"></i>
+                                    Auditoria
+                                </a>
+                            @endif
+                            @if($can('relatorios.visualizar'))
+                                <a class="nav-link {{ $isRoute('relatorios.*') ? 'is-active' : '' }}" href="{{ route('relatorios.index') }}" @if($isRoute('relatorios.*')) aria-current="page" @endif>
+                                    <i class="bi bi-graph-up-arrow"></i>
+                                    Relatorios
+                                </a>
+                            @endif
+                            @if($can('caixa.fechamento.visualizar'))
+                                <a class="nav-link {{ $isRoute('fechamento-caixa.*') ? 'is-active' : '' }}" href="{{ route('fechamento-caixa.index') }}" @if($isRoute('fechamento-caixa.*')) aria-current="page" @endif>
+                                    <i class="bi bi-cash-stack"></i>
+                                    Fechamento de Caixa
+                                </a>
+                            @endif
+                            @if($can('caixa.turno.visualizar'))
+                                <a class="nav-link {{ $isRoute('caixa.turno.*') ? 'is-active' : '' }}" href="{{ route('caixa.turno.index') }}" @if($isRoute('caixa.turno.*')) aria-current="page" @endif>
+                                    <i class="bi bi-clock-history"></i>
+                                    Turnos de Caixa
+                                </a>
+                            @endif
                         @else
-                            <a class="nav-link {{ $isRoute('caixa.turno.*') ? 'is-active' : '' }}" href="{{ route('caixa.turno.index') }}" @if($isRoute('caixa.turno.*')) aria-current="page" @endif>
-                                <i class="bi bi-clock-history"></i>
-                                Turno de Caixa
-                            </a>
-                            <a class="nav-link {{ $isRoute('leitor.produtos') ? 'is-active' : '' }}" href="{{ route('leitor.produtos') }}" @if($isRoute('leitor.produtos')) aria-current="page" @endif>
-                                <i class="bi bi-upc-scan"></i>
-                                Leitor de Produtos
-                            </a>
-                            <a class="nav-link {{ $isRoute('leitor.finalizar*') ? 'is-active' : '' }}" href="{{ route('leitor.finalizar') }}" @if($isRoute('leitor.finalizar*')) aria-current="page" @endif>
-                                <i class="bi bi-cart-check-fill"></i>
-                                Finalizar compra
-                            </a>
-                            <a class="nav-link {{ $isRoute('leitor.historico.*') ? 'is-active' : '' }}" href="{{ route('leitor.historico.index') }}" @if($isRoute('leitor.historico.*')) aria-current="page" @endif>
-                                <i class="bi bi-clock-history"></i>
-                                Historico de compras
-                            </a>
-                            <a class="nav-link {{ $isRoute('fechamento-caixa.*') ? 'is-active' : '' }}" href="{{ route('fechamento-caixa.index') }}" @if($isRoute('fechamento-caixa.*')) aria-current="page" @endif>
-                                <i class="bi bi-cash-stack"></i>
-                                Fechamento de Caixa
-                            </a>
+                            @if($can('caixa.turno.visualizar'))
+                                <a class="nav-link {{ $isRoute('caixa.turno.*') ? 'is-active' : '' }}" href="{{ route('caixa.turno.index') }}" @if($isRoute('caixa.turno.*')) aria-current="page" @endif>
+                                    <i class="bi bi-clock-history"></i>
+                                    Turno de Caixa
+                                </a>
+                            @endif
+                            @if($can('pdv.acessar'))
+                                <a class="nav-link {{ $isRoute('leitor.produtos') ? 'is-active' : '' }}" href="{{ route('leitor.produtos') }}" @if($isRoute('leitor.produtos')) aria-current="page" @endif>
+                                    <i class="bi bi-upc-scan"></i>
+                                    Leitor de Produtos
+                                </a>
+                            @endif
+                            @if($can('pdv.vender'))
+                                <a class="nav-link {{ $isRoute('leitor.finalizar*') ? 'is-active' : '' }}" href="{{ route('leitor.finalizar') }}" @if($isRoute('leitor.finalizar*')) aria-current="page" @endif>
+                                    <i class="bi bi-cart-check-fill"></i>
+                                    Finalizar compra
+                                </a>
+                            @endif
+                            @if($can('pdv.historico.visualizar'))
+                                <a class="nav-link {{ $isRoute('leitor.historico.*') ? 'is-active' : '' }}" href="{{ route('leitor.historico.index') }}" @if($isRoute('leitor.historico.*')) aria-current="page" @endif>
+                                    <i class="bi bi-clock-history"></i>
+                                    Historico de compras
+                                </a>
+                            @endif
+                            @if($can('caixa.fechamento.visualizar'))
+                                <a class="nav-link {{ $isRoute('fechamento-caixa.*') ? 'is-active' : '' }}" href="{{ route('fechamento-caixa.index') }}" @if($isRoute('fechamento-caixa.*')) aria-current="page" @endif>
+                                    <i class="bi bi-cash-stack"></i>
+                                    Fechamento de Caixa
+                                </a>
+                            @endif
                         @endif
                         <a class="nav-link {{ $isRoute('perfil.*') ? 'is-active' : '' }}" href="{{ route('perfil.index') }}" @if($isRoute('perfil.*')) aria-current="page" @endif>
                             <i class="bi bi-person-circle"></i>

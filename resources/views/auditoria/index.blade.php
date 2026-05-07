@@ -44,6 +44,18 @@
             <label for="rota" class="form-label">Rota (contendo)</label>
             <input type="text" name="rota" id="rota" class="form-control" value="{{ request('rota') }}">
         </div>
+        <div class="col-md-4 mt-2">
+            <label for="entidade" class="form-label">Entidade (contendo)</label>
+            <input type="text" name="entidade" id="entidade" class="form-control" value="{{ request('entidade') }}">
+        </div>
+        <div class="col-md-3 mt-2">
+            <label for="origem" class="form-label">Origem</label>
+            <select name="origem" id="origem" class="form-select">
+                <option value="">Todas</option>
+                <option value="middleware" {{ request('origem') === 'middleware' ? 'selected' : '' }}>Middleware</option>
+                <option value="observer" {{ request('origem') === 'observer' ? 'selected' : '' }}>Observer</option>
+            </select>
+        </div>
     </form>
 
     <div class="card border-0 shadow-sm">
@@ -56,9 +68,13 @@
                             <th>Usuario</th>
                             <th>Acao</th>
                             <th>Descricao</th>
+                            <th>Origem</th>
+                            <th>Entidade</th>
                             <th>Metodo</th>
                             <th>Rota</th>
                             <th>IP</th>
+                            <th>Antes</th>
+                            <th>Depois</th>
                             <th>Dados</th>
                         </tr>
                     </thead>
@@ -69,9 +85,31 @@
                                 <td>{{ optional($log->usuario)->nome ?? '-' }}</td>
                                 <td>{{ $log->acao }}</td>
                                 <td>{{ $log->descricao ?? '-' }}</td>
+                                <td>{{ $log->origem ?? '-' }}</td>
+                                <td>
+                                    @if ($log->entidade)
+                                        {{ $log->entidade }}#{{ $log->entidade_id }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td>{{ $log->metodo }}</td>
                                 <td>{{ $log->rota ?? $log->url }}</td>
                                 <td>{{ $log->ip ?? '-' }}</td>
+                                <td class="text-muted small">
+                                    @if (!empty($log->dados_antes))
+                                        {{ json_encode($log->dados_antes, JSON_UNESCAPED_UNICODE) }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td class="text-muted small">
+                                    @if (!empty($log->dados_depois))
+                                        {{ json_encode($log->dados_depois, JSON_UNESCAPED_UNICODE) }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="text-muted small">
                                     @if (!empty($log->dados))
                                         {{ json_encode($log->dados, JSON_UNESCAPED_UNICODE) }}
@@ -82,7 +120,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted">
+                                <td colspan="12" class="text-center text-muted">
                                     Nenhum registro encontrado.
                                 </td>
                             </tr>
