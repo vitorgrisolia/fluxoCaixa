@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CaixaTurno;
 use App\Models\Compra;
 use App\Models\MovimentacaoProduto;
 use App\Models\Produto;
+use App\Models\VendaItem;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +19,17 @@ class CompraFuncionarioController extends Controller
 
     public function create(Request $request)
     {
+        $usuario = Auth::user();
+        $turnoAberto = CaixaTurno::where('id_user', $usuario->id_user)
+            ->where('status', 'aberto')
+            ->orderBy('data_abertura', 'desc')
+            ->first();
+
+        if (! $turnoAberto) {
+            return redirect()->route('caixa.turno.index')
+                ->with('danger', 'Abra um turno de caixa antes de finalizar compras.');
+        }
+
         $itensSelecionados = $this->obterItensSelecionados($request->session()->get(self::LEITOR_SESSION_KEY, []));
 
         if ($itensSelecionados->isEmpty()) {
@@ -26,7 +39,7 @@ class CompraFuncionarioController extends Controller
 
         $totalCompra = $this->calcularTotalCompra($itensSelecionados);
 
-        return view('compra.finalizar')->with(compact('totalCompra', 'itensSelecionados'));
+        return view('compra.finalizar')->with(compact('totalCompra', 'itensSelecionados', 'turnoAberto'));
     }
 
     public function store(Request $request)
@@ -61,10 +74,20 @@ class CompraFuncionarioController extends Controller
         }
 
         $usuario = Auth::user();
+        $turnoAberto = CaixaTurno::where('id_user', $usuario->id_user)
+            ->where('status', 'aberto')
+            ->orderBy('data_abertura', 'desc')
+            ->first();
+
+        if (! $turnoAberto) {
+            return redirect()->route('caixa.turno.index')
+                ->with('danger', 'Nao existe turno aberto. Abra um turno para registrar a venda.');
+        }
+
         $totalCompra = 0;
 
         try {
-            DB::transaction(function () use ($selecaoLeitor, $dados, $dividirValor, $parcelas, $usuario, &$totalCompra) {
+            DB::transaction(function () use ($selecaoLeitor, $dados, $dividirValor, $parcelas, $usuario, $turnoAberto, &$totalCompra) {
                 $idsProdutos = $selecaoLeitor->keys()->map(function ($idProduto) {
                     return (int) $idProduto;
                 })->all();
@@ -86,7 +109,9 @@ class CompraFuncionarioController extends Controller
                     }
 
                     if ((int) $quantidadeSelecionada > (int) $produto->quantidade) {
-                        throw new \RuntimeException("Estoque insuficiente para {$produto->nome}.");
+                        throw new \RuntimeException(
+                            "Estoque insuficiente para {$produto->nome}: solicitado {$quantidadeSelecionada}, disponivel {$produto->quantidade}."
+                        );
                     }
 
                     $totalCompra += (float) $produto->preco_venda * (int) $quantidadeSelecionada;
@@ -99,6 +124,7 @@ class CompraFuncionarioController extends Controller
                     'forma_pagamento' => $dados['forma_pagamento'],
                     'dividir_valor' => $dividirValor,
                     'parcelas' => $parcelas,
+                    'id_turno' => $turnoAberto->id_turno,
                 ]);
                 $compra->id_user = $usuario->id_user;
                 $compra->save();
@@ -106,6 +132,18 @@ class CompraFuncionarioController extends Controller
                 foreach ($selecaoLeitor as $idProduto => $quantidadeSelecionada) {
                     $produto = $produtos->get((int) $idProduto);
                     $quantidade = (int) $quantidadeSelecionada;
+                    $subtotal = (float) $produto->preco_venda * $quantidade;
+
+                    VendaItem::create([
+                        'id_compra' => $compra->id_compra,
+                        'id_produto' => $produto->id_produto,
+                        'nome_produto' => $produto->nome,
+                        'lote' => $produto->lote,
+                        'codigo_barras' => $produto->codigo_barras,
+                        'quantidade' => $quantidade,
+                        'valor_unitario_venda' => $produto->preco_venda,
+                        'subtotal' => $subtotal,
+                    ]);
 
                     MovimentacaoProduto::create([
                         'id_produto' => $produto->id_produto,
@@ -145,7 +183,7 @@ class CompraFuncionarioController extends Controller
             $mensagem .= " Pagamento dividido em {$parcelas}x de R$ ".number_format($valorParcela, 2, ',', '.').".";
         }
 
-        $mensagem .= ' Leitor de produtos zerado e estoque atualizado.';
+        $mensagem .= " Venda vinculada ao turno #{$turnoAberto->id_turno}. Leitor de produtos zerado e estoque atualizado.";
 
         return redirect()->route('leitor.produtos')->with('success', $mensagem);
     }

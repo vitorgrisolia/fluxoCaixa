@@ -77,6 +77,17 @@
                 >
             </div>
 
+            <div class="col-md-3">
+                <label for="codigo_barras" class="form-label">Codigo de barras (EAN)</label>
+                <input
+                    type="text"
+                    name="codigo_barras"
+                    id="codigo_barras"
+                    class="form-control"
+                    value="{{ old('codigo_barras', $produto ? $produto->codigo_barras : '') }}"
+                >
+            </div>
+
             <div class="col-md-2">
                 <label for="quantidade" class="form-label">Quantidade:</label>
                 <input
@@ -87,6 +98,20 @@
                     min="0"
                     step="1"
                     value="{{ old('quantidade', $produto ? $produto->quantidade : 0) }}"
+                    required
+                >
+            </div>
+
+            <div class="col-md-2">
+                <label for="estoque_minimo" class="form-label">Estoque minimo:</label>
+                <input
+                    type="number"
+                    name="estoque_minimo"
+                    id="estoque_minimo"
+                    class="form-control"
+                    min="0"
+                    step="1"
+                    value="{{ old('estoque_minimo', $produto ? $produto->estoque_minimo : 0) }}"
                     required
                 >
             </div>

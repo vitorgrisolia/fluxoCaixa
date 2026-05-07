@@ -43,10 +43,22 @@
                     <a href="{{ route('produto.index') }}" class="alert-link">Ver produtos</a>
                 </li>
             @endif
-            @if($totalVencendo > 0)
+            @if($totalVencimentoCritico > 0)
                 <li>
-                    {{ $totalVencendo }} produto(s) vencendo nos proximos 30 dias.
+                    {{ $totalVencimentoCritico }} produto(s) com validade critica (0 a 7 dias).
                     <a href="{{ route('produto.index') }}" class="alert-link">Ver produtos</a>
+                </li>
+            @endif
+            @if($totalVencimentoAtencao > 0)
+                <li>
+                    {{ $totalVencimentoAtencao }} produto(s) vencendo entre 8 e 30 dias.
+                    <a href="{{ route('produto.index') }}" class="alert-link">Ver produtos</a>
+                </li>
+            @endif
+            @if($totalAbaixoEstoqueMinimo > 0)
+                <li>
+                    {{ $totalAbaixoEstoqueMinimo }} produto(s) no limite/abaixo do estoque minimo.
+                    <a href="{{ route('produto.index') }}" class="alert-link">Ver reposicao</a>
                 </li>
             @endif
             @if($saldoMes < 0)
@@ -57,7 +69,7 @@
                     <a href="{{ route('controle-financeiro.index') }}" class="alert-link">Ver controle financeiro</a>
                 </li>
             @endif
-            @if($totalVencidos === 0 && $totalVencendo === 0 && $saldoMes >= 0)
+            @if($totalVencidos === 0 && $totalVencimentoCritico === 0 && $totalVencimentoAtencao === 0 && $totalAbaixoEstoqueMinimo === 0 && $saldoMes >= 0)
                 <li>Nenhum alerta urgente no momento.</li>
             @endif
         </ul>
@@ -99,7 +111,10 @@
                         Itens em estoque: {{ $totalItensEstoque }} | Sem estoque: {{ $produtosSemEstoque }}
                     </p>
                     <p class="small text-muted mb-0">
-                        Vencidos: {{ $totalVencidos }} | Vencendo 30 dias: {{ $totalVencendo }}
+                        Vencidos: {{ $totalVencidos }} | Critico 7 dias: {{ $totalVencimentoCritico }} | 8-30 dias: {{ $totalVencimentoAtencao }}
+                    </p>
+                    <p class="small text-muted mb-0">
+                        Abaixo do minimo: {{ $totalAbaixoEstoqueMinimo }}
                     </p>
                     <a href="{{ route('produto.index') }}" class="btn btn-sm btn-outline-dark mt-3">
                         Ver produtos
@@ -288,6 +303,57 @@
                     </a>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 mt-3">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                <h2 class="h5 mb-0">Reposicao Prioritaria de Estoque</h2>
+                <a href="{{ route('produto.index') }}" class="btn btn-outline-secondary btn-sm">
+                    Ver todos os produtos
+                </a>
+            </div>
+
+            @if($produtosReposicaoDashboard->isEmpty())
+                <p class="text-muted mb-0">Nenhum produto no limite de estoque minimo.</p>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-striped table-border table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Lote</th>
+                                <th>Qtd atual</th>
+                                <th>Estoque minimo</th>
+                                <th>Sugestao de reposicao</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($produtosReposicaoDashboard as $produtoReposicao)
+                                @php
+                                    $faltanteReposicao = max((int) $produtoReposicao->estoque_minimo - (int) $produtoReposicao->quantidade, 0);
+                                @endphp
+                                <tr>
+                                    <td>{{ $produtoReposicao->nome }}</td>
+                                    <td>{{ $produtoReposicao->lote ?: '-' }}</td>
+                                    <td>{{ $produtoReposicao->quantidade }}</td>
+                                    <td>{{ $produtoReposicao->estoque_minimo }}</td>
+                                    <td>
+                                        @if($faltanteReposicao > 0)
+                                            Repor pelo menos {{ $faltanteReposicao }} unidade(s).
+                                        @else
+                                            No limite minimo, sugerido reforco preventivo.
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
     </div>
 </div>

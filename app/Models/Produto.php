@@ -17,7 +17,9 @@ class Produto extends Model
     protected $fillable = [
         'nome',
         'lote',
+        'codigo_barras',
         'quantidade',
+        'estoque_minimo',
         'tipo_quantidade',
         'validade',
         'preco_compra',
@@ -27,5 +29,10 @@ class Produto extends Model
     public function movimentacoes()
     {
         return $this->hasMany(MovimentacaoProduto::class, 'id_produto', 'id_produto');
+    }
+
+    public function vendaItens()
+    {
+        return $this->hasMany(VendaItem::class, 'id_produto', 'id_produto');
     }
 }

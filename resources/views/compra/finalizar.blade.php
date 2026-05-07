@@ -29,6 +29,13 @@
         </div>
     @endif
 
+    @if(isset($turnoAberto) && $turnoAberto)
+        <div class="alert alert-info">
+            Venda vinculada ao turno <strong>#{{ $turnoAberto->id_turno }}</strong>, aberto em
+            {{ \Carbon\Carbon::parse($turnoAberto->data_abertura)->format('d/m/Y H:i') }}.
+        </div>
+    @endif
+
     <div class="card mt-3">
         <div class="card-body">
             <form action="{{ route('leitor.finalizar.store') }}" method="post">

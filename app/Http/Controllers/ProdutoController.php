@@ -52,12 +52,14 @@ class ProdutoController extends Controller
                     if ($filtroNumerico !== null) {
                         $query->where('id_produto', $filtroNumerico)
                             ->orWhere('nome', 'like', "%{$filtro}%")
-                            ->orWhere('lote', 'like', "%{$filtro}%");
+                            ->orWhere('lote', 'like', "%{$filtro}%")
+                            ->orWhere('codigo_barras', 'like', "%{$filtro}%");
                         return;
                     }
 
                     $query->where('nome', 'like', "%{$filtro}%")
-                        ->orWhere('lote', 'like', "%{$filtro}%");
+                        ->orWhere('lote', 'like', "%{$filtro}%")
+                        ->orWhere('codigo_barras', 'like', "%{$filtro}%");
                 })
                 ->orderBy('nome')
                 ->limit(30)
@@ -97,6 +99,7 @@ class ProdutoController extends Controller
         } elseif ($codigo !== '') {
             $produto = Produto::query()
                 ->where('lote', $codigo)
+                ->orWhere('codigo_barras', $codigo)
                 ->orWhere('id_produto', ctype_digit($codigo) ? (int) $codigo : -1)
                 ->first();
         }
@@ -134,6 +137,16 @@ class ProdutoController extends Controller
             ->with('success', "Produto {$produto->nome} adicionado ao leitor.");
     }
 
+    public function incrementarNoLeitor(Request $request, int $idProduto)
+    {
+        return $this->alterarQuantidadeNoLeitor($request, $idProduto, 1);
+    }
+
+    public function decrementarNoLeitor(Request $request, int $idProduto)
+    {
+        return $this->alterarQuantidadeNoLeitor($request, $idProduto, -1);
+    }
+
     public function removerDoLeitor(Request $request, int $idProduto)
     {
         $dados = $request->validate([
@@ -162,15 +175,79 @@ class ProdutoController extends Controller
             ->with('success', 'Leitor zerado com sucesso.');
     }
 
+    private function alterarQuantidadeNoLeitor(Request $request, int $idProduto, int $delta)
+    {
+        $dados = $request->validate([
+            'filtro_retorno' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $produto = Produto::findOrFail($idProduto);
+        $selecao = collect($request->session()->get(self::LEITOR_SESSION_KEY, []))
+            ->map(function ($quantidade) {
+                return (int) $quantidade;
+            });
+
+        $quantidadeAtual = (int) $selecao->get((string) $idProduto, $selecao->get($idProduto, 0));
+        if ($quantidadeAtual <= 0) {
+            return redirect()->route('leitor.produtos', ['filtro' => $dados['filtro_retorno'] ?? null])
+                ->with('danger', 'Produto nao esta no leitor.');
+        }
+
+        $novaQuantidade = $quantidadeAtual + $delta;
+        if ($novaQuantidade > (int) $produto->quantidade) {
+            return redirect()->route('leitor.produtos', ['filtro' => $dados['filtro_retorno'] ?? null])
+                ->with('danger', "Nao foi possivel incrementar {$produto->nome}: estoque disponivel {$produto->quantidade}.");
+        }
+
+        if ($novaQuantidade <= 0) {
+            $selecao->forget((string) $idProduto);
+            $selecao->forget($idProduto);
+        } else {
+            $selecao->put($idProduto, $novaQuantidade);
+        }
+
+        if ($selecao->isEmpty()) {
+            $request->session()->forget(self::LEITOR_SESSION_KEY);
+        } else {
+            $request->session()->put(self::LEITOR_SESSION_KEY, $selecao->all());
+        }
+
+        return redirect()->route('leitor.produtos', ['filtro' => $dados['filtro_retorno'] ?? null])
+            ->with('success', "Quantidade de {$produto->nome} atualizada no leitor.");
+    }
+
     public function index()
     {
         $produtos = Produto::orderBy('validade')->orderBy('nome')->get();
         $hoje = Carbon::today();
+        $limiteCritico = $hoje->copy()->addDays(7);
+        $limiteAtencao = $hoje->copy()->addDays(30);
 
         $totalVencidos = Produto::whereDate('validade', '<', $hoje)->count();
-        $totalVencendo = Produto::whereBetween('validade', [$hoje, $hoje->copy()->addDays(30)])->count();
+        $totalVencimentoCritico = Produto::whereBetween('validade', [$hoje, $limiteCritico])->count();
+        $totalVencimentoAtencao = Produto::whereBetween('validade', [$limiteCritico->copy()->addDay(), $limiteAtencao])->count();
+        $totalVencendo = $totalVencimentoCritico + $totalVencimentoAtencao;
 
-        return view('produto.index')->with(compact('produtos', 'totalVencidos', 'totalVencendo'));
+        $totalAbaixoEstoqueMinimo = Produto::query()
+            ->whereColumn('quantidade', '<=', 'estoque_minimo')
+            ->count();
+
+        $produtosReposicao = Produto::query()
+            ->whereColumn('quantidade', '<=', 'estoque_minimo')
+            ->orderByRaw('(estoque_minimo - quantidade) DESC')
+            ->orderBy('nome')
+            ->take(10)
+            ->get();
+
+        return view('produto.index')->with(compact(
+            'produtos',
+            'totalVencidos',
+            'totalVencendo',
+            'totalVencimentoCritico',
+            'totalVencimentoAtencao',
+            'totalAbaixoEstoqueMinimo',
+            'produtosReposicao'
+        ));
     }
 
     public function create()
@@ -185,7 +262,9 @@ class ProdutoController extends Controller
         $dados = $request->validate([
             'nome' => ['required', 'string', 'max:255'],
             'lote' => ['required', 'string', 'max:100'],
+            'codigo_barras' => ['nullable', 'string', 'max:100', 'unique:produtos,codigo_barras'],
             'quantidade' => ['required', 'integer', 'min:0'],
+            'estoque_minimo' => ['required', 'integer', 'min:0'],
             'tipo_quantidade' => ['required', 'in:caixa,unidade'],
             'validade' => ['required', 'date'],
             'preco_compra' => ['required', 'numeric', 'min:0'],
@@ -213,7 +292,9 @@ class ProdutoController extends Controller
         $dados = $request->validate([
             'nome' => ['required', 'string', 'max:255'],
             'lote' => ['required', 'string', 'max:100'],
+            'codigo_barras' => ['nullable', 'string', 'max:100', 'unique:produtos,codigo_barras,'.$produto->id_produto.',id_produto'],
             'quantidade' => ['required', 'integer', 'min:0'],
+            'estoque_minimo' => ['required', 'integer', 'min:0'],
             'tipo_quantidade' => ['required', 'in:caixa,unidade'],
             'validade' => ['required', 'date'],
             'preco_compra' => ['required', 'numeric', 'min:0'],

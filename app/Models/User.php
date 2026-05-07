@@ -59,4 +59,9 @@ class User extends Authenticatable
         return $this->belongsTo(Lancamento::class, 'id_user', 'id_user')
                     ->orderBy('dt_faturamento');
     }
+
+    public function turnos()
+    {
+        return $this->hasMany(CaixaTurno::class, 'id_user', 'id_user');
+    }
 }

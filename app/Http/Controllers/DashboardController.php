@@ -20,9 +20,21 @@ class DashboardController extends Controller
     public function index()
     {
         $hoje = Carbon::today();
+        $limiteCritico = $hoje->copy()->addDays(7);
+        $limiteAtencao = $hoje->copy()->addDays(30);
 
         $totalVencidos = Produto::whereDate('validade', '<', $hoje)->count();
-        $totalVencendo = Produto::whereBetween('validade', [$hoje, $hoje->copy()->addDays(30)])->count();
+        $totalVencimentoCritico = Produto::whereBetween('validade', [$hoje, $limiteCritico])->count();
+        $totalVencimentoAtencao = Produto::whereBetween('validade', [$limiteCritico->copy()->addDay(), $limiteAtencao])->count();
+        $totalVencendo = $totalVencimentoCritico + $totalVencimentoAtencao;
+        $totalAbaixoEstoqueMinimo = Produto::whereColumn('quantidade', '<=', 'estoque_minimo')->count();
+
+        $produtosReposicaoDashboard = Produto::query()
+            ->whereColumn('quantidade', '<=', 'estoque_minimo')
+            ->orderByRaw('(estoque_minimo - quantidade) DESC')
+            ->orderBy('nome')
+            ->take(5)
+            ->get();
 
         $inicioMes = $hoje->copy()->startOfMonth();
         $fimMes = $hoje->copy()->endOfMonth();
@@ -132,6 +144,10 @@ class DashboardController extends Controller
         return view('dashboard')->with([
             'totalVencidos' => $totalVencidos,
             'totalVencendo' => $totalVencendo,
+            'totalVencimentoCritico' => $totalVencimentoCritico,
+            'totalVencimentoAtencao' => $totalVencimentoAtencao,
+            'totalAbaixoEstoqueMinimo' => $totalAbaixoEstoqueMinimo,
+            'produtosReposicaoDashboard' => $produtosReposicaoDashboard,
             'saldoMes' => $saldoMes,
             'inicioMes' => $inicioMes,
             'fimMes' => $fimMes,

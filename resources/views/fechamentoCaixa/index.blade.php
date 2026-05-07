@@ -35,6 +35,7 @@
                 <tr>
                     <th>Acoes</th>
                     <th>Data</th>
+                    <th>Turno</th>
                     @if ($isAdmin)
                         <th>Funcionario</th>
                     @endif
@@ -43,6 +44,8 @@
                     <th>Cartao</th>
                     <th>PIX</th>
                     <th>Outros</th>
+                    <th>Sangria</th>
+                    <th>Suprimento</th>
                     <th>Saldo final</th>
                 </tr>
             </thead>
@@ -64,6 +67,7 @@
                             </form>
                         </td>
                         <td>{{ \Carbon\Carbon::parse($fechamento->data_fechamento)->format('d/m/Y') }}</td>
+                        <td>{{ $fechamento->id_turno ? '#'.$fechamento->id_turno : '-' }}</td>
                         @if ($isAdmin)
                             <td>{{ optional($fechamento->usuario)->nome ?? '---' }}</td>
                         @endif
@@ -72,11 +76,13 @@
                         <td>R$ {{ number_format($fechamento->valor_cartao, 2, ',', '.') }}</td>
                         <td>R$ {{ number_format($fechamento->valor_pix, 2, ',', '.') }}</td>
                         <td>R$ {{ number_format($fechamento->valor_outros, 2, ',', '.') }}</td>
+                        <td>R$ {{ number_format($fechamento->total_sangria, 2, ',', '.') }}</td>
+                        <td>R$ {{ number_format($fechamento->total_suprimento, 2, ',', '.') }}</td>
                         <td>R$ {{ number_format($fechamento->saldo_final, 2, ',', '.') }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ $isAdmin ? 9 : 8 }}" class="text-center text-muted">
+                        <td colspan="{{ $isAdmin ? 12 : 11 }}" class="text-center text-muted">
                             Nenhum fechamento de caixa registrado.
                         </td>
                     </tr>

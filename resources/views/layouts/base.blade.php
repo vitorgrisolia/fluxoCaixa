@@ -96,7 +96,15 @@
                                 <i class="bi bi-cash-stack"></i>
                                 Fechamento de Caixa
                             </a>
+                            <a class="nav-link {{ $isRoute('caixa.turno.*') ? 'is-active' : '' }}" href="{{ route('caixa.turno.index') }}" @if($isRoute('caixa.turno.*')) aria-current="page" @endif>
+                                <i class="bi bi-clock-history"></i>
+                                Turnos de Caixa
+                            </a>
                         @else
+                            <a class="nav-link {{ $isRoute('caixa.turno.*') ? 'is-active' : '' }}" href="{{ route('caixa.turno.index') }}" @if($isRoute('caixa.turno.*')) aria-current="page" @endif>
+                                <i class="bi bi-clock-history"></i>
+                                Turno de Caixa
+                            </a>
                             <a class="nav-link {{ $isRoute('leitor.produtos') ? 'is-active' : '' }}" href="{{ route('leitor.produtos') }}" @if($isRoute('leitor.produtos')) aria-current="page" @endif>
                                 <i class="bi bi-upc-scan"></i>
                                 Leitor de Produtos

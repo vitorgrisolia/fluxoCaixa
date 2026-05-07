@@ -31,7 +31,7 @@
                 @csrf
                 <input type="hidden" name="filtro_retorno" value="{{ $filtro }}">
                 <div class="col-md-6">
-                    <label for="codigo_leitor" class="form-label">Codigo do produto (ID ou lote)</label>
+                    <label for="codigo_leitor" class="form-label">Codigo do produto (ID, lote ou codigo de barras)</label>
                     <input
                         type="text"
                         name="codigo"
@@ -76,7 +76,7 @@
             <h5 class="card-title">Pesquisar produto</h5>
             <form method="get" action="{{ route('leitor.produtos') }}" class="row g-2 align-items-end">
                 <div class="col-md-8">
-                    <label for="filtro" class="form-label">Filtro por nome, lote ou ID</label>
+                    <label for="filtro" class="form-label">Filtro por nome, lote, codigo de barras ou ID</label>
                     <input
                         type="text"
                         name="filtro"
@@ -108,6 +108,7 @@
                                 <th>ID</th>
                                 <th>Produto</th>
                                 <th>Lote</th>
+                                <th>Cod. barras</th>
                                 <th>Estoque</th>
                                 <th>Valor de venda</th>
                                 <th>Adicionar</th>
@@ -119,6 +120,7 @@
                                     <td>{{ $produto->id_produto }}</td>
                                     <td>{{ $produto->nome }}</td>
                                     <td>{{ $produto->lote ?: '-' }}</td>
+                                    <td>{{ $produto->codigo_barras ?: '-' }}</td>
                                     <td>{{ $produto->quantidade }}</td>
                                     <td>R$ {{ number_format($produto->preco_venda, 2, ',', '.') }}</td>
                                     <td>
@@ -162,11 +164,23 @@
                                     <td>{{ $produtoSelecionado->quantidade_selecionada }}</td>
                                     <td>R$ {{ number_format($produtoSelecionado->total_item_selecionado, 2, ',', '.') }}</td>
                                     <td class="text-end">
-                                        <form action="{{ route('leitor.produtos.remover', ['idProduto' => $produtoSelecionado->id_produto]) }}" method="post">
-                                            @csrf
-                                            <input type="hidden" name="filtro_retorno" value="{{ $filtro }}">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">Remover</button>
-                                        </form>
+                                        <div class="d-flex justify-content-end gap-1">
+                                            <form action="{{ route('leitor.produtos.decrementar', ['idProduto' => $produtoSelecionado->id_produto]) }}" method="post">
+                                                @csrf
+                                                <input type="hidden" name="filtro_retorno" value="{{ $filtro }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary">-</button>
+                                            </form>
+                                            <form action="{{ route('leitor.produtos.incrementar', ['idProduto' => $produtoSelecionado->id_produto]) }}" method="post">
+                                                @csrf
+                                                <input type="hidden" name="filtro_retorno" value="{{ $filtro }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
+                                            </form>
+                                            <form action="{{ route('leitor.produtos.remover', ['idProduto' => $produtoSelecionado->id_produto]) }}" method="post">
+                                                @csrf
+                                                <input type="hidden" name="filtro_retorno" value="{{ $filtro }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Remover</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

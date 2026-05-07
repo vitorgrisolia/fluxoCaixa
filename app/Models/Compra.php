@@ -19,10 +19,21 @@ class Compra extends Model
         'forma_pagamento',
         'dividir_valor',
         'parcelas',
+        'id_turno',
     ];
 
     public function usuario()
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
+    }
+
+    public function turno()
+    {
+        return $this->belongsTo(CaixaTurno::class, 'id_turno', 'id_turno');
+    }
+
+    public function itens()
+    {
+        return $this->hasMany(VendaItem::class, 'id_compra', 'id_compra');
     }
 }

@@ -28,9 +28,11 @@
                 <tr>
                     <th>Acoes</th>
                     <th>Data</th>
+                    <th>Turno</th>
                     <th>Forma de pagamento</th>
                     <th>Total</th>
                     <th>Parcelas</th>
+                    <th>Itens</th>
                 </tr>
             </thead>
             <tbody>
@@ -51,13 +53,15 @@
                             </form>
                         </td>
                         <td>{{ \Carbon\Carbon::parse($compra->data_compra)->format('d/m/Y H:i') }}</td>
+                        <td>{{ $compra->id_turno ? '#'.$compra->id_turno : '-' }}</td>
                         <td>{{ ucfirst(str_replace('_', ' ', $compra->forma_pagamento)) }}</td>
                         <td>R$ {{ number_format($compra->valor_total, 2, ',', '.') }}</td>
                         <td>{{ $compra->dividir_valor === 'sim' ? ($compra->parcelas . 'x') : '-' }}</td>
+                        <td>{{ $compra->itens_count }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center text-muted">
+                        <td colspan="7" class="text-center text-muted">
                             Nenhuma compra registrada.
                         </td>
                     </tr>

@@ -4,12 +4,16 @@
 <div class="col-12">
     @php
         $isAdmin = Auth::user()->tipo_usuario === 'admin';
+        $turnoAtual = $turnoAberto ?? ($fechamento ? $fechamento->turno : null);
         $readonlyTotais = $fechamento ? ! $isAdmin : true;
+        $readonlySaldoInicial = ! $isAdmin && $turnoAtual;
         $valorDinheiro = old('valor_dinheiro', $fechamento ? $fechamento->valor_dinheiro : ($totaisPagamento['valor_dinheiro'] ?? 0));
         $valorCartao = old('valor_cartao', $fechamento ? $fechamento->valor_cartao : ($totaisPagamento['valor_cartao'] ?? 0));
         $valorPix = old('valor_pix', $fechamento ? $fechamento->valor_pix : ($totaisPagamento['valor_pix'] ?? 0));
         $valorOutros = old('valor_outros', $fechamento ? $fechamento->valor_outros : ($totaisPagamento['valor_outros'] ?? 0));
-        $saldoInicial = old('saldo_inicial', $fechamento ? $fechamento->saldo_inicial : 0);
+        $totalSangria = old('total_sangria', $fechamento ? $fechamento->total_sangria : ($totaisMovimentacao['total_sangria'] ?? 0));
+        $totalSuprimento = old('total_suprimento', $fechamento ? $fechamento->total_suprimento : ($totaisMovimentacao['total_suprimento'] ?? 0));
+        $saldoInicial = old('saldo_inicial', $fechamento ? $fechamento->saldo_inicial : ($turnoAtual ? $turnoAtual->saldo_inicial : 0));
         $totalSaidas = old('total_saidas', $fechamento ? $fechamento->total_saidas : 0);
     @endphp
 
@@ -21,15 +25,22 @@
         @endif
     </h1>
 
-    @if (! $fechamento && isset($inicio, $fim))
+    @if ($turnoAtual)
         <div class="alert alert-info">
-            Periodo do login: {{ $inicio->format('d/m/Y H:i') }} ate {{ $fim->format('d/m/Y H:i') }}.
+            Turno vinculado: <strong>#{{ $turnoAtual->id_turno }}</strong>.
+            @if(isset($inicio, $fim))
+                Periodo: {{ $inicio->format('d/m/Y H:i') }} ate {{ $fim->format('d/m/Y H:i') }}.
+            @endif
+        </div>
+    @elseif (! $fechamento && isset($inicio, $fim))
+        <div class="alert alert-info">
+            Periodo: {{ $inicio->format('d/m/Y H:i') }} ate {{ $fim->format('d/m/Y H:i') }}.
         </div>
     @endif
 
-    @if (! $fechamento)
+    @if (! $fechamento && $turnoAtual)
         <p class="text-muted">
-            Valores de pagamento sao preenchidos automaticamente com base nas compras finalizadas no periodo do login.
+            Valores de pagamento e movimentacoes sao preenchidos automaticamente com base nas vendas e operacoes do turno.
         </p>
     @endif
 
@@ -74,6 +85,7 @@
                     class="form-control"
                     value="{{ $saldoInicial }}"
                     required
+                    {{ $readonlySaldoInicial ? 'readonly' : '' }}
                 >
             </div>
             <div class="form-group col-md-3">
@@ -135,6 +147,32 @@
                 >
             </div>
             <div class="form-group col-md-3">
+                <label for="total_sangria" class="form-label">Total de sangria</label>
+                <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    name="total_sangria"
+                    id="total_sangria"
+                    class="form-control"
+                    value="{{ $totalSangria }}"
+                    {{ $readonlyTotais ? 'readonly' : '' }}
+                >
+            </div>
+            <div class="form-group col-md-3">
+                <label for="total_suprimento" class="form-label">Total de suprimento</label>
+                <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    name="total_suprimento"
+                    id="total_suprimento"
+                    class="form-control"
+                    value="{{ $totalSuprimento }}"
+                    {{ $readonlyTotais ? 'readonly' : '' }}
+                >
+            </div>
+            <div class="form-group col-md-3">
                 <label for="total_saidas" class="form-label">Outras saidas</label>
                 <input
                     type="number"
@@ -184,6 +222,8 @@
         const valorCartaoInput = document.getElementById('valor_cartao');
         const valorPixInput = document.getElementById('valor_pix');
         const valorOutrosInput = document.getElementById('valor_outros');
+        const totalSangriaInput = document.getElementById('total_sangria');
+        const totalSuprimentoInput = document.getElementById('total_suprimento');
         const totalSaidasInput = document.getElementById('total_saidas');
         const saldoFinalInput = document.getElementById('saldo_final');
 
@@ -197,9 +237,11 @@
                 + parseFloat(valorCartaoInput.value || '0')
                 + parseFloat(valorPixInput.value || '0')
                 + parseFloat(valorOutrosInput.value || '0');
+            const totalSangria = parseFloat(totalSangriaInput.value || '0');
+            const totalSuprimento = parseFloat(totalSuprimentoInput.value || '0');
             const saidas = parseFloat(totalSaidasInput.value || '0');
 
-            const saldoFinal = saldoInicial + entradas - saidas;
+            const saldoFinal = saldoInicial + entradas + totalSuprimento - totalSangria - saidas;
             saldoFinalInput.value = formatarBRL(saldoFinal);
         }
 
@@ -208,6 +250,8 @@
         valorCartaoInput.addEventListener('input', atualizarSaldoFinal);
         valorPixInput.addEventListener('input', atualizarSaldoFinal);
         valorOutrosInput.addEventListener('input', atualizarSaldoFinal);
+        totalSangriaInput.addEventListener('input', atualizarSaldoFinal);
+        totalSuprimentoInput.addEventListener('input', atualizarSaldoFinal);
         totalSaidasInput.addEventListener('input', atualizarSaldoFinal);
 
         atualizarSaldoFinal();

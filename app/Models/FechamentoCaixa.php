@@ -15,11 +15,14 @@ class FechamentoCaixa extends Model
 
     protected $fillable = [
         'data_fechamento',
+        'id_turno',
         'saldo_inicial',
         'valor_dinheiro',
         'valor_cartao',
         'valor_pix',
         'valor_outros',
+        'total_sangria',
+        'total_suprimento',
         'total_entradas',
         'total_saidas',
         'saldo_final',
@@ -29,5 +32,10 @@ class FechamentoCaixa extends Model
     public function usuario()
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
+    }
+
+    public function turno()
+    {
+        return $this->belongsTo(CaixaTurno::class, 'id_turno', 'id_turno');
     }
 }

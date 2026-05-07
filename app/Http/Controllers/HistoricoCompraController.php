@@ -13,7 +13,8 @@ class HistoricoCompraController extends Controller
     {
         $usuario = Auth::user();
 
-        $compras = Compra::where('id_user', $usuario->id_user)
+        $compras = Compra::withCount('itens')
+            ->where('id_user', $usuario->id_user)
             ->orderBy('data_compra', 'desc')
             ->get();
 
@@ -41,7 +42,7 @@ class HistoricoCompraController extends Controller
 
     public function show(int $id)
     {
-        $compra = Compra::findOrFail($id);
+        $compra = Compra::with(['itens', 'turno'])->findOrFail($id);
         $this->garantirPermissao($compra);
 
         return view('compra.historico.show')->with(compact('compra'));
@@ -102,6 +103,7 @@ class HistoricoCompraController extends Controller
         $dados['parcelas'] = ($cartaoCredito && $dados['dividir_valor'] === 'sim')
             ? (int) ($dados['parcelas'] ?? 1)
             : null;
+        $dados['id_turno'] = null;
 
         return $dados;
     }

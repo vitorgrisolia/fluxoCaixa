@@ -18,6 +18,10 @@
                     <strong>Data</strong>
                     <div>{{ \Carbon\Carbon::parse($fechamento->data_fechamento)->format('d/m/Y') }}</div>
                 </div>
+                <div class="col-md-3">
+                    <strong>Turno</strong>
+                    <div>{{ $fechamento->id_turno ? '#'.$fechamento->id_turno : '-' }}</div>
+                </div>
                 @if ($isAdmin)
                     <div class="col-md-4">
                         <strong>Funcionario</strong>
@@ -43,6 +47,14 @@
                 <div class="col-md-3">
                     <strong>Outros</strong>
                     <div>R$ {{ number_format($fechamento->valor_outros, 2, ',', '.') }}</div>
+                </div>
+                <div class="col-md-3">
+                    <strong>Sangria</strong>
+                    <div>R$ {{ number_format($fechamento->total_sangria, 2, ',', '.') }}</div>
+                </div>
+                <div class="col-md-3">
+                    <strong>Suprimento</strong>
+                    <div>R$ {{ number_format($fechamento->total_suprimento, 2, ',', '.') }}</div>
                 </div>
                 <div class="col-md-3">
                     <strong>Outras saidas</strong>

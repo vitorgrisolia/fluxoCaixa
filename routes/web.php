@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 #Controllers
 use App\Http\Controllers\CentroCustoController;
+use App\Http\Controllers\CaixaTurnoController;
 use App\Http\Controllers\CompraFuncionarioController;
 use App\Http\Controllers\AuditoriaController;
 use App\Http\Controllers\ConfiguracaoController;
@@ -92,6 +93,8 @@ Route::middleware(['auth', 'funcionario'])->controller(ProdutoController::class)
 {
     Route::get('/leitor-produtos', 'leitor')->name('leitor.produtos');
     Route::post('/leitor-produtos/adicionar', 'adicionarAoLeitor')->name('leitor.produtos.adicionar');
+    Route::post('/leitor-produtos/incrementar/{idProduto}', 'incrementarNoLeitor')->name('leitor.produtos.incrementar');
+    Route::post('/leitor-produtos/decrementar/{idProduto}', 'decrementarNoLeitor')->name('leitor.produtos.decrementar');
     Route::post('/leitor-produtos/remover/{idProduto}', 'removerDoLeitor')->name('leitor.produtos.remover');
     Route::post('/leitor-produtos/zerar', 'zerarLeitor')->name('leitor.produtos.zerar');
 });
@@ -101,6 +104,24 @@ Route::prefix('leitor-produtos')->middleware(['auth', 'funcionario'])->controlle
 {
     Route::get('/finalizar-compra', 'create')->name('leitor.finalizar');
     Route::post('/finalizar-compra', 'store')->name('leitor.finalizar.store');
+});
+
+/*
+|--------------------------------------------------------------------------
+| TURNO DE CAIXA (FUNCIONARIO E ADMIN)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('caixa-turno')->middleware(['auth'])->controller(CaixaTurnoController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('caixa.turno.index');
+});
+
+Route::prefix('caixa-turno')->middleware(['auth', 'funcionario'])->controller(CaixaTurnoController::class)
+->group(function ()
+{
+    Route::post('/abrir', 'abrir')->name('caixa.turno.abrir');
+    Route::post('/movimentar', 'movimentar')->name('caixa.turno.movimentar');
 });
 
 /*
