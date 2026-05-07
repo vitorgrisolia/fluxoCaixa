@@ -8,15 +8,158 @@ use Illuminate\Support\Carbon;
 
 class ProdutoController extends Controller
 {
-    public function leitor()
-    {
-        $produtos = Produto::orderBy('nome')->get();
+    private const LEITOR_SESSION_KEY = 'leitor_produtos';
 
-        $totalCompra = $produtos->sum(function ($produto) {
-            return $produto->preco_compra * $produto->quantidade;
+    public function leitor(Request $request)
+    {
+        $filtro = trim((string) $request->query('filtro', ''));
+        $selecaoLeitor = collect($request->session()->get(self::LEITOR_SESSION_KEY, []))
+            ->map(function ($quantidade) {
+                return (int) $quantidade;
+            })
+            ->filter(function ($quantidade) {
+                return $quantidade > 0;
+            });
+
+        $produtosSelecionados = Produto::whereIn('id_produto', $selecaoLeitor->keys()->map(function ($idProduto) {
+                return (int) $idProduto;
+            })->all())
+            ->orderBy('nome')
+            ->get()
+            ->map(function (Produto $produto) use ($selecaoLeitor) {
+            $quantidadeSelecionada = (int) $selecaoLeitor->get((string) $produto->id_produto, $selecaoLeitor->get($produto->id_produto, 0));
+            $produto->quantidade_selecionada = $quantidadeSelecionada;
+            $produto->total_item_selecionado = $quantidadeSelecionada * (float) $produto->preco_venda;
+
+            return $produto;
+        })->filter(function (Produto $produto) {
+            return $produto->quantidade_selecionada > 0;
+        })->values();
+
+        $totalCompra = $produtosSelecionados->sum(function (Produto $produto) {
+            return $produto->total_item_selecionado;
         });
 
-        return view('produto.leitor')->with(compact('produtos', 'totalCompra'));
+        $quantidadeItensSelecionados = $produtosSelecionados->sum(function (Produto $produto) {
+            return $produto->quantidade_selecionada;
+        });
+
+        $resultadosBusca = collect();
+        if ($filtro !== '') {
+            $filtroNumerico = ctype_digit($filtro) ? (int) $filtro : null;
+            $resultadosBusca = Produto::query()
+                ->where(function ($query) use ($filtro, $filtroNumerico) {
+                    if ($filtroNumerico !== null) {
+                        $query->where('id_produto', $filtroNumerico)
+                            ->orWhere('nome', 'like', "%{$filtro}%")
+                            ->orWhere('lote', 'like', "%{$filtro}%");
+                        return;
+                    }
+
+                    $query->where('nome', 'like', "%{$filtro}%")
+                        ->orWhere('lote', 'like', "%{$filtro}%");
+                })
+                ->orderBy('nome')
+                ->limit(30)
+                ->get();
+        }
+
+        return view('produto.leitor')->with(compact(
+            'filtro',
+            'resultadosBusca',
+            'produtosSelecionados',
+            'totalCompra',
+            'quantidadeItensSelecionados',
+            'selecaoLeitor'
+        ));
+    }
+
+    public function adicionarAoLeitor(Request $request)
+    {
+        $dados = $request->validate([
+            'id_produto' => ['nullable', 'integer'],
+            'codigo' => ['nullable', 'string', 'max:255'],
+            'quantidade' => ['required', 'integer', 'min:1'],
+            'filtro_retorno' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $idProduto = isset($dados['id_produto']) ? (int) $dados['id_produto'] : null;
+        $codigo = isset($dados['codigo']) ? trim((string) $dados['codigo']) : '';
+
+        if ($idProduto === null && $codigo === '') {
+            return redirect()->route('leitor.produtos', ['filtro' => $dados['filtro_retorno'] ?? null])
+                ->with('danger', 'Informe um codigo ou selecione um produto na busca.');
+        }
+
+        $produto = null;
+        if ($idProduto !== null) {
+            $produto = Produto::find($idProduto);
+        } elseif ($codigo !== '') {
+            $produto = Produto::query()
+                ->where('lote', $codigo)
+                ->orWhere('id_produto', ctype_digit($codigo) ? (int) $codigo : -1)
+                ->first();
+        }
+
+        if (! $produto) {
+            return redirect()->route('leitor.produtos', ['filtro' => $dados['filtro_retorno'] ?? $codigo])
+                ->with('danger', 'Produto nao encontrado para o codigo informado.');
+        }
+
+        $quantidadeAdicionar = (int) $dados['quantidade'];
+
+        if ($quantidadeAdicionar > (int) $produto->quantidade) {
+            return redirect()->route('leitor.produtos', ['filtro' => $dados['filtro_retorno'] ?? null])
+                ->with('danger', "Quantidade informada para {$produto->nome} maior que o estoque disponivel.");
+        }
+
+        $selecao = collect($request->session()->get(self::LEITOR_SESSION_KEY, []))
+            ->map(function ($quantidade) {
+                return (int) $quantidade;
+            });
+
+        $idProdutoSelecionado = (int) $produto->id_produto;
+        $quantidadeAtual = (int) $selecao->get((string) $idProdutoSelecionado, $selecao->get($idProdutoSelecionado, 0));
+        $novaQuantidade = $quantidadeAtual + $quantidadeAdicionar;
+
+        if ($novaQuantidade > (int) $produto->quantidade) {
+            return redirect()->route('leitor.produtos', ['filtro' => $dados['filtro_retorno'] ?? null])
+                ->with('danger', "Quantidade total para {$produto->nome} no leitor excede o estoque.");
+        }
+
+        $selecao->put($idProdutoSelecionado, $novaQuantidade);
+        $request->session()->put(self::LEITOR_SESSION_KEY, $selecao->all());
+
+        return redirect()->route('leitor.produtos', ['filtro' => $dados['filtro_retorno'] ?? null])
+            ->with('success', "Produto {$produto->nome} adicionado ao leitor.");
+    }
+
+    public function removerDoLeitor(Request $request, int $idProduto)
+    {
+        $dados = $request->validate([
+            'filtro_retorno' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $selecao = collect($request->session()->get(self::LEITOR_SESSION_KEY, []));
+        $selecao->forget((string) (int) $idProduto);
+        $selecao->forget((int) $idProduto);
+
+        if ($selecao->isEmpty()) {
+            $request->session()->forget(self::LEITOR_SESSION_KEY);
+        } else {
+            $request->session()->put(self::LEITOR_SESSION_KEY, $selecao->all());
+        }
+
+        return redirect()->route('leitor.produtos', ['filtro' => $dados['filtro_retorno'] ?? null])
+            ->with('success', 'Produto removido do leitor.');
+    }
+
+    public function zerarLeitor(Request $request)
+    {
+        $request->session()->forget(self::LEITOR_SESSION_KEY);
+
+        return redirect()->route('leitor.produtos')
+            ->with('success', 'Leitor zerado com sucesso.');
     }
 
     public function index()
