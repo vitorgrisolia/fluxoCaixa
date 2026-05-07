@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Compra;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class HistoricoCompraController extends Controller
 {
@@ -80,13 +81,29 @@ class HistoricoCompraController extends Controller
 
     private function validarDados(Request $request): array
     {
-        return $request->validate([
+        $validator = Validator::make($request->all(), [
             'data_compra' => ['required', 'date'],
             'valor_total' => ['required', 'numeric', 'min:0'],
             'forma_pagamento' => ['required', 'in:pix,dinheiro,cartao_debito,cartao_credito,boleto,vale_alimentacao'],
-            'dividir_valor' => ['required', 'in:sim,nao'],
-            'parcelas' => ['nullable', 'integer', 'min:1', 'max:12', 'required_if:dividir_valor,sim'],
+            'dividir_valor' => ['nullable', 'in:sim,nao'],
+            'parcelas' => ['nullable', 'integer', 'min:1', 'max:12'],
         ]);
+        $validator->sometimes('dividir_valor', 'required', function ($input) {
+            return $input->forma_pagamento === 'cartao_credito';
+        });
+        $validator->sometimes('parcelas', 'required', function ($input) {
+            return $input->forma_pagamento === 'cartao_credito' && $input->dividir_valor === 'sim';
+        });
+
+        $dados = $validator->validate();
+        $cartaoCredito = $dados['forma_pagamento'] === 'cartao_credito';
+
+        $dados['dividir_valor'] = $cartaoCredito ? ($dados['dividir_valor'] ?? 'nao') : 'nao';
+        $dados['parcelas'] = ($cartaoCredito && $dados['dividir_valor'] === 'sim')
+            ? (int) ($dados['parcelas'] ?? 1)
+            : null;
+
+        return $dados;
     }
 
     private function garantirPermissao(Compra $compra): void

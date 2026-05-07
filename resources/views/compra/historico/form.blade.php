@@ -68,11 +68,11 @@
         </div>
 
         <div class="row mt-3">
-            <div class="form-group col-md-3">
-                <label for="dividir_valor" class="form-label">Quer dividir valor?</label>
-                <select name="dividir_valor" id="dividir_valor" class="form-select" required>
-                    <option value="nao" {{ old('dividir_valor', $compra->dividir_valor ?? 'nao') === 'nao' ? 'selected' : '' }}>Nao</option>
-                    <option value="sim" {{ old('dividir_valor', $compra->dividir_valor ?? '') === 'sim' ? 'selected' : '' }}>Sim</option>
+            <div class="form-group col-md-3" id="opcoes-credito-container" style="display: none;">
+                <label for="dividir_valor" class="form-label">No cartao de credito, pagamento sera</label>
+                <select name="dividir_valor" id="dividir_valor" class="form-select">
+                    <option value="nao" {{ old('dividir_valor', $compra->dividir_valor ?? 'nao') === 'nao' ? 'selected' : '' }}>A vista</option>
+                    <option value="sim" {{ old('dividir_valor', $compra->dividir_valor ?? '') === 'sim' ? 'selected' : '' }}>Dividir em parcelas</option>
                 </select>
             </div>
             <div class="form-group col-md-3" id="parcelas-container" style="display: none;">
@@ -102,12 +102,18 @@
 @section('script')
 <script>
     (function () {
+        const formaPagamento = document.getElementById('forma_pagamento');
+        const opcoesCreditoContainer = document.getElementById('opcoes-credito-container');
         const dividirValor = document.getElementById('dividir_valor');
         const parcelasContainer = document.getElementById('parcelas-container');
         const parcelasInput = document.getElementById('parcelas');
 
+        function formaEhCartaoCredito() {
+            return formaPagamento.value === 'cartao_credito';
+        }
+
         function alternarParcelas() {
-            const mostrarParcelas = dividirValor.value === 'sim';
+            const mostrarParcelas = formaEhCartaoCredito() && dividirValor.value === 'sim';
             parcelasContainer.style.display = mostrarParcelas ? 'block' : 'none';
             parcelasInput.required = mostrarParcelas;
 
@@ -116,8 +122,21 @@
             }
         }
 
+        function alternarOpcoesCartao() {
+            const formaCredito = formaEhCartaoCredito();
+            opcoesCreditoContainer.style.display = formaCredito ? 'block' : 'none';
+            dividirValor.required = formaCredito;
+
+            if (!formaCredito) {
+                dividirValor.value = 'nao';
+            }
+
+            alternarParcelas();
+        }
+
+        formaPagamento.addEventListener('change', alternarOpcoesCartao);
         dividirValor.addEventListener('change', alternarParcelas);
-        alternarParcelas();
+        alternarOpcoesCartao();
     })();
 </script>
 @endsection

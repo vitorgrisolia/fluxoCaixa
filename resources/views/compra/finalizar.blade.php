@@ -12,6 +12,12 @@
         </div>
     @endif
 
+    @if (session('danger'))
+        <div class="alert alert-danger">
+            {{ session('danger') }}
+        </div>
+    @endif
+
     @if ($errors->any())
         <div class="alert alert-danger">
             <strong>Erro ao finalizar:</strong>
@@ -27,6 +33,30 @@
         <div class="card-body">
             <form action="{{ route('leitor.finalizar.store') }}" method="post">
                 @csrf
+
+                <div class="mb-3">
+                    <label class="form-label">Produtos selecionados no leitor</label>
+                    <table class="table table-sm table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Qtd</th>
+                                <th>Valor de venda</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($itensSelecionados as $item)
+                                <tr>
+                                    <td>{{ $item->nome }}</td>
+                                    <td>{{ $item->quantidade_selecionada }}</td>
+                                    <td>R$ {{ number_format($item->preco_venda, 2, ',', '.') }}</td>
+                                    <td>R$ {{ number_format($item->total_item_selecionado, 2, ',', '.') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="mb-3">
                     <label class="form-label">Valor total da compra</label>
@@ -53,11 +83,11 @@
                     </select>
                 </div>
 
-                <div class="mb-3">
-                    <label for="dividir_valor" class="form-label">Quer dividir valor?</label>
-                    <select name="dividir_valor" id="dividir_valor" class="form-select" required>
-                        <option value="nao" {{ old('dividir_valor', 'nao') === 'nao' ? 'selected' : '' }}>Nao</option>
-                        <option value="sim" {{ old('dividir_valor') === 'sim' ? 'selected' : '' }}>Sim</option>
+                <div class="mb-3" id="opcoes-credito-container" style="display: none;">
+                    <label for="dividir_valor" class="form-label">No cartao de credito, pagamento sera</label>
+                    <select name="dividir_valor" id="dividir_valor" class="form-select">
+                        <option value="nao" {{ old('dividir_valor', 'nao') === 'nao' ? 'selected' : '' }}>A vista</option>
+                        <option value="sim" {{ old('dividir_valor') === 'sim' ? 'selected' : '' }}>Dividir em parcelas</option>
                     </select>
                 </div>
 
@@ -97,6 +127,7 @@
 <script>
     (function () {
         const formaPagamento = document.getElementById('forma_pagamento');
+        const opcoesCreditoContainer = document.getElementById('opcoes-credito-container');
         const dividirValor = document.getElementById('dividir_valor');
         const parcelasContainer = document.getElementById('parcelas-container');
         const parcelasInput = document.getElementById('parcelas');
@@ -109,9 +140,14 @@
             return 'R$ ' + valor.toFixed(2).replace('.', ',');
         }
 
+        function formaEhCartaoCredito() {
+            return formaPagamento.value === 'cartao_credito';
+        }
+
         function atualizarValorParcela() {
+            const formaCredito = formaEhCartaoCredito();
             const dividirSelecionado = dividirValor.value === 'sim';
-            const mostrarParcelas = dividirSelecionado;
+            const mostrarParcelas = formaCredito && dividirSelecionado;
 
             if (mostrarParcelas) {
                 const parcelas = parseInt(parcelasInput.value || '0', 10);
@@ -128,8 +164,9 @@
         }
 
         function alternarParcelas() {
+            const formaCredito = formaEhCartaoCredito();
             const dividirSelecionado = dividirValor.value === 'sim';
-            const mostrarParcelas = dividirSelecionado;
+            const mostrarParcelas = formaCredito && dividirSelecionado;
 
             parcelasContainer.style.display = mostrarParcelas ? 'block' : 'none';
             parcelasInput.required = mostrarParcelas;
@@ -141,11 +178,23 @@
             atualizarValorParcela();
         }
 
-        formaPagamento.addEventListener('change', alternarParcelas);
+        function alternarOpcoesCartao() {
+            const formaCredito = formaEhCartaoCredito();
+            opcoesCreditoContainer.style.display = formaCredito ? 'block' : 'none';
+            dividirValor.required = formaCredito;
+
+            if (!formaCredito) {
+                dividirValor.value = 'nao';
+            }
+
+            alternarParcelas();
+        }
+
+        formaPagamento.addEventListener('change', alternarOpcoesCartao);
         dividirValor.addEventListener('change', alternarParcelas);
         parcelasInput.addEventListener('input', atualizarValorParcela);
 
-        alternarParcelas();
+        alternarOpcoesCartao();
     })();
 </script>
 @endsection

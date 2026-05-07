@@ -91,6 +91,9 @@ Route::middleware(['auth', 'funcionario'])->controller(ProdutoController::class)
 ->group(function ()
 {
     Route::get('/leitor-produtos', 'leitor')->name('leitor.produtos');
+    Route::post('/leitor-produtos/adicionar', 'adicionarAoLeitor')->name('leitor.produtos.adicionar');
+    Route::post('/leitor-produtos/remover/{idProduto}', 'removerDoLeitor')->name('leitor.produtos.remover');
+    Route::post('/leitor-produtos/zerar', 'zerarLeitor')->name('leitor.produtos.zerar');
 });
 
 Route::prefix('leitor-produtos')->middleware(['auth', 'funcionario'])->controller(CompraFuncionarioController::class)
