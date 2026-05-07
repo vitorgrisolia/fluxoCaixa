@@ -78,6 +78,73 @@
 
 <div class="col-12 mt-3">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+        <h2 class="h5 mb-0">KPIs de Operacao</h2>
+        <span class="text-muted small">Base mensal</span>
+    </div>
+</div>
+
+<div class="col-12">
+    <div class="row g-3">
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Ticket medio de vendas</p>
+                    <h3 class="mb-0">R$ {{ number_format($ticketMedioCompras, 2, ',', '.') }}</h3>
+                    <p class="small text-muted mb-0">Com base em {{ $comprasMes }} venda(s) no mes.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Produto mais vendido</p>
+                    @if($produtoMaisVendido)
+                        <h3 class="mb-0">{{ $produtoMaisVendido->nome_produto }}</h3>
+                        <p class="small text-muted mb-0">
+                            Qtd: {{ $produtoMaisVendido->quantidade_vendida }} |
+                            Receita: R$ {{ number_format($produtoMaisVendido->receita, 2, ',', '.') }}
+                        </p>
+                    @else
+                        <h3 class="mb-0">Sem vendas</h3>
+                        <p class="small text-muted mb-0">Nenhum item vendido no periodo.</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Ruptura de estoque</p>
+                    <h3 class="mb-0 {{ $produtosSemEstoque > 0 ? 'text-danger' : 'text-success' }}">
+                        {{ number_format($indiceRuptura, 2, ',', '.') }}%
+                    </h3>
+                    <p class="small text-muted mb-0">
+                        {{ $produtosSemEstoque }} produto(s) sem estoque.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Margem bruta de vendas</p>
+                    <h3 class="mb-0 {{ $margemBrutaVendasMes >= 0 ? 'text-success' : 'text-danger' }}">
+                        {{ number_format($margemBrutaVendasMes, 2, ',', '.') }}%
+                    </h3>
+                    <p class="small text-muted mb-0">
+                        Lucro bruto: R$ {{ number_format($lucroBrutoVendasMes, 2, ',', '.') }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 mt-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
         <h2 class="h5 mb-0">Resumo geral</h2>
         <span class="text-muted small">
             Periodo: {{ $inicioMes->format('d/m/Y') }} a {{ $fimMes->format('d/m/Y') }}

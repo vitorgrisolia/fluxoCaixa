@@ -18,6 +18,17 @@
         </div>
     @endif
 
+    @if ($errors->any())
+        <div class="alert alert-danger mt-3">
+            <strong>Confira os campos informados:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="alert alert-info mt-3">
         Valor total selecionado: <strong>R$ {{ number_format($totalCompra, 2, ',', '.') }}</strong>
         <br>
@@ -67,6 +78,141 @@
             </form>
             <form id="form-zerar-leitor" action="{{ route('leitor.produtos.zerar') }}" method="post">
                 @csrf
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5 class="card-title">Cadastro rapido de produto no PDV</h5>
+            <p class="text-muted small mb-3">
+                Use esta opcao quando o codigo lido nao estiver cadastrado. O produto ja pode entrar no leitor apos salvar.
+            </p>
+            <form action="{{ route('leitor.produtos.cadastro-rapido') }}" method="post" class="row g-2 align-items-end">
+                @csrf
+                <input type="hidden" name="filtro_retorno" value="{{ $filtro }}">
+                <div class="col-md-3">
+                    <label for="codigo_barras_rapido" class="form-label">Codigo de barras*</label>
+                    <input
+                        type="text"
+                        name="codigo_barras"
+                        id="codigo_barras_rapido"
+                        class="form-control"
+                        value="{{ old('codigo_barras', $filtro) }}"
+                        required
+                    >
+                </div>
+                <div class="col-md-3">
+                    <label for="nome_rapido" class="form-label">Nome*</label>
+                    <input
+                        type="text"
+                        name="nome"
+                        id="nome_rapido"
+                        class="form-control"
+                        value="{{ old('nome') }}"
+                        required
+                    >
+                </div>
+                <div class="col-md-2">
+                    <label for="lote_rapido" class="form-label">Lote</label>
+                    <input
+                        type="text"
+                        name="lote"
+                        id="lote_rapido"
+                        class="form-control"
+                        value="{{ old('lote') }}"
+                    >
+                </div>
+                <div class="col-md-2">
+                    <label for="tipo_quantidade_rapido" class="form-label">Tipo</label>
+                    <select name="tipo_quantidade" id="tipo_quantidade_rapido" class="form-select" required>
+                        <option value="unidade" {{ old('tipo_quantidade', 'unidade') === 'unidade' ? 'selected' : '' }}>Unidade</option>
+                        <option value="caixa" {{ old('tipo_quantidade') === 'caixa' ? 'selected' : '' }}>Caixa</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="quantidade_inicial_rapido" class="form-label">Qtd inicial*</label>
+                    <input
+                        type="number"
+                        name="quantidade_inicial"
+                        id="quantidade_inicial_rapido"
+                        class="form-control"
+                        min="1"
+                        value="{{ old('quantidade_inicial', 1) }}"
+                        required
+                    >
+                </div>
+                <div class="col-md-2">
+                    <label for="estoque_minimo_rapido" class="form-label">Estoque minimo*</label>
+                    <input
+                        type="number"
+                        name="estoque_minimo"
+                        id="estoque_minimo_rapido"
+                        class="form-control"
+                        min="0"
+                        value="{{ old('estoque_minimo', 0) }}"
+                        required
+                    >
+                </div>
+                <div class="col-md-2">
+                    <label for="validade_rapido" class="form-label">Validade*</label>
+                    <input
+                        type="date"
+                        name="validade"
+                        id="validade_rapido"
+                        class="form-control"
+                        value="{{ old('validade', now()->addYear()->format('Y-m-d')) }}"
+                        required
+                    >
+                </div>
+                <div class="col-md-2">
+                    <label for="preco_compra_rapido" class="form-label">Preco compra*</label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        name="preco_compra"
+                        id="preco_compra_rapido"
+                        class="form-control"
+                        value="{{ old('preco_compra', 0) }}"
+                        required
+                    >
+                </div>
+                <div class="col-md-2">
+                    <label for="preco_venda_rapido" class="form-label">Preco venda</label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        name="preco_venda"
+                        id="preco_venda_rapido"
+                        class="form-control"
+                        value="{{ old('preco_venda', 0) }}"
+                    >
+                </div>
+                <div class="col-md-2">
+                    <label for="adicionar_ao_leitor_rapido" class="form-label">Adicionar no leitor</label>
+                    <select name="adicionar_ao_leitor" id="adicionar_ao_leitor_rapido" class="form-select">
+                        <option value="sim" {{ old('adicionar_ao_leitor', 'sim') === 'sim' ? 'selected' : '' }}>Sim</option>
+                        <option value="nao" {{ old('adicionar_ao_leitor') === 'nao' ? 'selected' : '' }}>Nao</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="quantidade_leitor_rapido" class="form-label">Qtd no leitor</label>
+                    <input
+                        type="number"
+                        name="quantidade_leitor"
+                        id="quantidade_leitor_rapido"
+                        class="form-control"
+                        min="1"
+                        value="{{ old('quantidade_leitor', 1) }}"
+                    >
+                </div>
+                <div class="col-md-2 d-grid d-md-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Cadastrar rapido
+                    </button>
+                </div>
             </form>
         </div>
     </div>

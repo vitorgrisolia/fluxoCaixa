@@ -10,6 +10,17 @@ use Illuminate\Support\Facades\DB;
 
 class EstoqueController extends Controller
 {
+    private const MOTIVOS_AJUSTE = [
+        'reposicao_fornecedor' => 'Reposicao de fornecedor',
+        'ajuste_inventario' => 'Ajuste de inventario',
+        'avaria_perda' => 'Avaria / perda',
+        'vencimento_descarte' => 'Vencimento / descarte',
+        'transferencia_estoque' => 'Transferencia de estoque',
+        'devolucao_cliente' => 'Devolucao de cliente',
+        'venda_externa' => 'Venda externa / baixa manual',
+        'venda_pdv' => 'Venda no PDV',
+    ];
+
     public function index(Request $request)
     {
         $periodo = $request->input('periodo', 'dia');
@@ -74,6 +85,7 @@ class EstoqueController extends Controller
             'totalSaidasQuantidade' => $totalSaidasQuantidade,
             'resumoValorVenda' => $resumoValorVenda,
             'valorTotalEstoqueVenda' => $valorTotalEstoqueVenda,
+            'motivosAjuste' => self::MOTIVOS_AJUSTE,
         ]);
     }
 
@@ -82,9 +94,10 @@ class EstoqueController extends Controller
         $dados = $request->validate([
             'id_produto' => ['required', 'integer'],
             'tipo_movimentacao' => ['required', 'in:entrada,saida'],
+            'motivo_ajuste' => ['required', 'in:'.implode(',', array_keys(self::MOTIVOS_AJUSTE))],
             'quantidade' => ['required', 'integer', 'min:1'],
             'data_movimentacao' => ['required', 'date'],
-            'observacao' => ['nullable', 'string', 'max:500'],
+            'observacao' => ['required', 'string', 'max:500'],
             'periodo_atual' => ['nullable', 'in:dia,semana,mes'],
             'data_atual' => ['nullable', 'date'],
         ]);
@@ -102,12 +115,13 @@ class EstoqueController extends Controller
             MovimentacaoProduto::create([
                 'id_produto' => $produto->id_produto,
                 'tipo_movimentacao' => $dados['tipo_movimentacao'],
+                'motivo_ajuste' => $dados['motivo_ajuste'],
                 'quantidade' => $dados['quantidade'],
                 'valor_unitario_venda' => $dados['tipo_movimentacao'] === 'saida'
                     ? $produto->preco_venda
                     : null,
                 'data_movimentacao' => $dados['data_movimentacao'],
-                'observacao' => $dados['observacao'] ?? null,
+                'observacao' => $dados['observacao'],
             ]);
 
             if ($dados['tipo_movimentacao'] === 'entrada') {

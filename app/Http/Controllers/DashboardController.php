@@ -14,6 +14,7 @@ use App\Models\Tipo;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
 {
@@ -49,6 +50,7 @@ class DashboardController extends Controller
         $totalProdutos = Produto::count();
         $totalItensEstoque = Produto::sum('quantidade');
         $produtosSemEstoque = Produto::where('quantidade', '<=', 0)->count();
+        $indiceRuptura = $totalProdutos > 0 ? ($produtosSemEstoque / $totalProdutos) * 100 : 0;
         $valorTotalEstoqueVenda = Produto::sum(DB::raw('preco_venda * quantidade'));
 
         $movimentacoesMesBase = MovimentacaoProduto::whereBetween('data_movimentacao', [
@@ -117,6 +119,39 @@ class DashboardController extends Controller
         $comprasCartao = (float) (($comprasPorForma['cartao_debito'] ?? 0) + ($comprasPorForma['cartao_credito'] ?? 0));
         $comprasOutros = (float) (($comprasPorForma['boleto'] ?? 0) + ($comprasPorForma['vale_alimentacao'] ?? 0));
 
+        $temSubtotalCusto = Schema::hasColumn('venda_itens', 'subtotal_custo');
+        $temValorUnitarioCusto = Schema::hasColumn('venda_itens', 'valor_unitario_custo');
+
+        $expressaoCusto = 'COALESCE(p.preco_compra, 0) * vi.quantidade';
+        if ($temSubtotalCusto && $temValorUnitarioCusto) {
+            $expressaoCusto = "CASE WHEN vi.subtotal_custo > 0 THEN vi.subtotal_custo WHEN vi.valor_unitario_custo > 0 THEN vi.valor_unitario_custo * vi.quantidade ELSE COALESCE(p.preco_compra, 0) * vi.quantidade END";
+        } elseif ($temSubtotalCusto) {
+            $expressaoCusto = "CASE WHEN vi.subtotal_custo > 0 THEN vi.subtotal_custo ELSE COALESCE(p.preco_compra, 0) * vi.quantidade END";
+        } elseif ($temValorUnitarioCusto) {
+            $expressaoCusto = "CASE WHEN vi.valor_unitario_custo > 0 THEN vi.valor_unitario_custo * vi.quantidade ELSE COALESCE(p.preco_compra, 0) * vi.quantidade END";
+        }
+
+        $resumoVendaMes = DB::table('venda_itens as vi')
+            ->join('compras as c', 'vi.id_compra', '=', 'c.id_compra')
+            ->leftJoin('produtos as p', 'vi.id_produto', '=', 'p.id_produto')
+            ->whereBetween('c.data_compra', [$inicioMesData, $fimMesData])
+            ->selectRaw('SUM(vi.subtotal) as receita_total, SUM('.$expressaoCusto.') as custo_total, SUM(vi.quantidade) as quantidade_total')
+            ->first();
+
+        $receitaVendasMes = (float) ($resumoVendaMes->receita_total ?? 0);
+        $custoVendasMes = (float) ($resumoVendaMes->custo_total ?? 0);
+        $lucroBrutoVendasMes = $receitaVendasMes - $custoVendasMes;
+        $margemBrutaVendasMes = $receitaVendasMes > 0 ? ($lucroBrutoVendasMes / $receitaVendasMes) * 100 : 0;
+
+        $produtoMaisVendido = DB::table('venda_itens as vi')
+            ->join('compras as c', 'vi.id_compra', '=', 'c.id_compra')
+            ->whereBetween('c.data_compra', [$inicioMesData, $fimMesData])
+            ->selectRaw('vi.id_produto, vi.nome_produto, SUM(vi.quantidade) as quantidade_vendida, SUM(vi.subtotal) as receita')
+            ->groupBy('vi.id_produto', 'vi.nome_produto')
+            ->orderByDesc('quantidade_vendida')
+            ->orderByDesc('receita')
+            ->first();
+
         $fechamentosMes = FechamentoCaixa::whereBetween('data_fechamento', [$inicioMes, $fimMes])->count();
         $ultimoFechamento = FechamentoCaixa::with('usuario')
             ->orderBy('data_fechamento', 'desc')
@@ -158,6 +193,7 @@ class DashboardController extends Controller
             'totalProdutos' => $totalProdutos,
             'totalItensEstoque' => $totalItensEstoque,
             'produtosSemEstoque' => $produtosSemEstoque,
+            'indiceRuptura' => $indiceRuptura,
             'valorTotalEstoqueVenda' => $valorTotalEstoqueVenda,
             'movimentacoesMes' => $movimentacoesMes,
             'entradasEstoqueMes' => $entradasEstoqueMes,
@@ -176,6 +212,11 @@ class DashboardController extends Controller
             'comprasPix' => $comprasPix,
             'comprasCartao' => $comprasCartao,
             'comprasOutros' => $comprasOutros,
+            'receitaVendasMes' => $receitaVendasMes,
+            'custoVendasMes' => $custoVendasMes,
+            'lucroBrutoVendasMes' => $lucroBrutoVendasMes,
+            'margemBrutaVendasMes' => $margemBrutaVendasMes,
+            'produtoMaisVendido' => $produtoMaisVendido,
             'fechamentosMes' => $fechamentosMes,
             'ultimoFechamento' => $ultimoFechamento,
             'auditoriasSemana' => $auditoriasSemana,

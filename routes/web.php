@@ -93,6 +93,7 @@ Route::middleware(['auth', 'funcionario'])->controller(ProdutoController::class)
 {
     Route::get('/leitor-produtos', 'leitor')->name('leitor.produtos');
     Route::post('/leitor-produtos/adicionar', 'adicionarAoLeitor')->name('leitor.produtos.adicionar');
+    Route::post('/leitor-produtos/cadastro-rapido', 'cadastroRapidoNoLeitor')->name('leitor.produtos.cadastro-rapido');
     Route::post('/leitor-produtos/incrementar/{idProduto}', 'incrementarNoLeitor')->name('leitor.produtos.incrementar');
     Route::post('/leitor-produtos/decrementar/{idProduto}', 'decrementarNoLeitor')->name('leitor.produtos.decrementar');
     Route::post('/leitor-produtos/remover/{idProduto}', 'removerDoLeitor')->name('leitor.produtos.remover');
@@ -152,6 +153,7 @@ Route::prefix('produto')->middleware(['auth', 'admin'])->controller(ProdutoContr
     Route::get('/', 'index')->                name('produto.index');
     Route::get('/novo', 'create')->           name('produto.create');
     Route::get('/editar/{id}', 'edit')->      name('produto.edit');
+    Route::post('/importar', 'importarLote')->name('produto.importar');
     Route::post('/cadastrar', 'store')->      name('produto.store');
     Route::post('/atualizar/{id}', 'update')->name('produto.update');
     Route::post('/deletar/{id}', 'destroy')-> name('produto.delete');

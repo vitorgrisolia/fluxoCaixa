@@ -12,6 +12,12 @@
         </div>
     @endif
 
+    @if (session('warning'))
+        <div class="alert alert-warning">
+            {{ session('warning') }}
+        </div>
+    @endif
+
     @if ($totalVencidos > 0)
         <div class="alert alert-danger">
             Existem {{ $totalVencidos }} produto(s) vencido(s).
@@ -85,6 +91,35 @@
         <a href="{{ route('produto.create') }}" class="btn btn-dark mb-3 mt-3">
             Novo produto
         </a>
+
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h2 class="h6 mb-3">Importacao em lote (CSV/Excel)</h2>
+                <p class="text-muted small mb-3">
+                    Colunas aceitas: <strong>nome, lote, codigo_barras, quantidade, estoque_minimo, tipo_quantidade, validade, preco_compra, preco_venda</strong>.
+                    Tambem aceita aliases como <code>produto</code>, <code>qtd</code>, <code>ean</code> e <code>custo</code>.
+                </p>
+                <form action="{{ route('produto.importar') }}" method="post" enctype="multipart/form-data" class="row g-2 align-items-end">
+                    @csrf
+                    <div class="col-md-6">
+                        <label for="arquivo_importacao" class="form-label">Arquivo (.csv, .txt, .xls, .xlsx)</label>
+                        <input type="file" name="arquivo_importacao" id="arquivo_importacao" class="form-control" accept=".csv,.txt,.xls,.xlsx" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="atualizar_existentes" class="form-label">Quando produto existir</label>
+                        <select name="atualizar_existentes" id="atualizar_existentes" class="form-select">
+                            <option value="nao">Ignorar existente</option>
+                            <option value="sim">Atualizar existente</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-grid d-md-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            Importar lote
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     @endif
 
     <hr>

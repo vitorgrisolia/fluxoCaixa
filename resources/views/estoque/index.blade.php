@@ -129,14 +129,26 @@
                     <input type="number" name="quantidade" id="quantidade" min="1" step="1" class="form-control" value="{{ old('quantidade', 1) }}" required>
                 </div>
 
+                <div class="col-md-4">
+                    <label for="motivo_ajuste" class="form-label">Motivo do ajuste*</label>
+                    <select name="motivo_ajuste" id="motivo_ajuste" class="form-select" required>
+                        <option value="">Selecione</option>
+                        @foreach (collect($motivosAjuste)->except('venda_pdv') as $valorMotivo => $labelMotivo)
+                            <option value="{{ $valorMotivo }}" {{ old('motivo_ajuste') === $valorMotivo ? 'selected' : '' }}>
+                                {{ $labelMotivo }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
                 <div class="col-md-2">
                     <label for="data_movimentacao" class="form-label">Data</label>
                     <input type="date" name="data_movimentacao" id="data_movimentacao" class="form-control" value="{{ old('data_movimentacao', now()->format('Y-m-d')) }}" required>
                 </div>
 
                 <div class="col-md-8">
-                    <label for="observacao" class="form-label">Observacao</label>
-                    <input type="text" name="observacao" id="observacao" maxlength="500" class="form-control" value="{{ old('observacao') }}">
+                    <label for="observacao" class="form-label">Observacao detalhada*</label>
+                    <input type="text" name="observacao" id="observacao" maxlength="500" class="form-control" value="{{ old('observacao') }}" required>
                 </div>
 
                 <div class="col-md-4">
@@ -200,14 +212,15 @@
             <div class="table-responsive">
                 <table class="table table-striped align-middle mb-0">
                     <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Produto</th>
-                            <th>Tipo</th>
-                            <th>Quantidade</th>
-                            <th>Valor unitario venda</th>
-                            <th>Total venda</th>
-                            <th>Observacao</th>
+                            <tr>
+                                <th>Data</th>
+                                <th>Produto</th>
+                                <th>Tipo</th>
+                                <th>Motivo</th>
+                                <th>Quantidade</th>
+                                <th>Valor unitario venda</th>
+                                <th>Total venda</th>
+                                <th>Observacao</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -219,6 +232,9 @@
                                     <span class="badge {{ $movimentacao->tipo_movimentacao === 'entrada' ? 'bg-success' : 'bg-danger' }}">
                                         {{ ucfirst($movimentacao->tipo_movimentacao) }}
                                     </span>
+                                </td>
+                                <td>
+                                    {{ $motivosAjuste[$movimentacao->motivo_ajuste] ?? ucfirst(str_replace('_', ' ', $movimentacao->motivo_ajuste ?? '')) }}
                                 </td>
                                 <td>{{ $movimentacao->quantidade }}</td>
                                 <td>
@@ -239,7 +255,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center">Nenhuma movimentacao registrada no periodo.</td>
+                                <td colspan="8" class="text-center">Nenhuma movimentacao registrada no periodo.</td>
                             </tr>
                         @endforelse
                     </tbody>

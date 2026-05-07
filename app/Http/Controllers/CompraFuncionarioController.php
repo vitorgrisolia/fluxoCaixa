@@ -153,6 +153,7 @@ class CompraFuncionarioController extends Controller
                     MovimentacaoProduto::create([
                         'id_produto' => $produto->id_produto,
                         'tipo_movimentacao' => 'saida',
+                        'motivo_ajuste' => 'venda_pdv',
                         'quantidade' => $quantidade,
                         'valor_unitario_venda' => $produto->preco_venda,
                         'data_movimentacao' => now()->toDateString(),

@@ -15,6 +15,7 @@ class MovimentacaoProduto extends Model
     protected $fillable = [
         'id_produto',
         'tipo_movimentacao',
+        'motivo_ajuste',
         'quantidade',
         'valor_unitario_venda',
         'data_movimentacao',

@@ -49,7 +49,7 @@
                     <div class="navbar-nav">
                         @if($isAdmin)
                             <a class="nav-link {{ $isRoute('home.*') ? 'is-active' : '' }}" href="{{ route('home.index') }}" @if($isRoute('home.*')) aria-current="page" @endif>
-                                <i class="bi bi-house-door-fill"></i>
+                                <i class="bi bi-house-door-fill ml-3"></i>
                                 Home
                             </a>
                             <a class="nav-link {{ $isRoute('lancamento.*') ? 'is-active' : '' }}" href="{{ route('lancamento.index') }}" @if($isRoute('lancamento.*')) aria-current="page" @endif>
@@ -77,7 +77,7 @@
                                 Controle de Estoque
                             </a>
                             <a class="nav-link {{ $isRoute('controle-financeiro.*') ? 'is-active' : '' }}" href="{{ route('controle-financeiro.index') }}" @if($isRoute('controle-financeiro.*')) aria-current="page" @endif>
-                                <i class="bi bi-bank"></i>
+                                <i class="bi bi-bank ml-3"></i>
                                 Controle Financeiro
                             </a>
                             <a class="nav-link {{ $isRoute('configuracoes.*') ? 'is-active' : '' }}" href="{{ route('configuracoes.index') }}" @if($isRoute('configuracoes.*')) aria-current="page" @endif>
@@ -127,7 +127,7 @@
                             Perfil
                         </a>
                         <a class="nav-link" href="{{ route('logout') }}">
-                            <i class="bi bi-box-arrow-right"></i>
+                            <i class="bi bi-box-arrow-right ml-3"></i>
                             Sair
                         </a>
                     </div>
