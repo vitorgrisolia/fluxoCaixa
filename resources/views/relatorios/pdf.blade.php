@@ -61,6 +61,129 @@
         </div>
     @endif
 
+    @if ($mostrar['margem_produto'])
+        <div class="section">
+            <h2>Margem por produto e lucro do periodo</h2>
+            <table class="summary">
+                <tr>
+                    <td><strong>Receita total</strong></td>
+                    <td>R$ {{ number_format($resumoMargem['receita_total'], 2, ',', '.') }}</td>
+                    <td><strong>Custo total</strong></td>
+                    <td>R$ {{ number_format($resumoMargem['custo_total'], 2, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Lucro bruto</strong></td>
+                    <td>R$ {{ number_format($resumoMargem['lucro_bruto'], 2, ',', '.') }}</td>
+                    <td><strong>Margem bruta (%)</strong></td>
+                    <td>{{ number_format($resumoMargem['margem_bruta_percentual'], 2, ',', '.') }}%</td>
+                </tr>
+            </table>
+            <table class="table" style="margin-top: 8px;">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Codigo barras</th>
+                        <th>Qtd vendida</th>
+                        <th>Receita</th>
+                        <th>Custo</th>
+                        <th>Lucro bruto</th>
+                        <th>Margem (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($margemProdutos as $item)
+                        <tr>
+                            <td>{{ $item->nome_produto }}</td>
+                            <td>{{ $item->codigo_barras ?: '-' }}</td>
+                            <td>{{ $item->quantidade_total }}</td>
+                            <td>R$ {{ number_format($item->receita_total, 2, ',', '.') }}</td>
+                            <td>R$ {{ number_format($item->custo_total, 2, ',', '.') }}</td>
+                            <td>R$ {{ number_format($item->lucro_bruto, 2, ',', '.') }}</td>
+                            <td>{{ number_format($item->margem_percentual, 2, ',', '.') }}%</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="muted">Nenhuma venda com itens detalhados no periodo.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    @endif
+
+    @if ($mostrar['dre_mensal'])
+        <div class="section">
+            <h2>DRE simplificada mensal</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Receita</th>
+                        <th>Custos (CMV)</th>
+                        <th>Despesas</th>
+                        <th>Resultado</th>
+                        <th>Margem resultado (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($dreMensal as $item)
+                        <tr>
+                            <td>{{ $item['mes'] }}</td>
+                            <td>R$ {{ number_format($item['receita'], 2, ',', '.') }}</td>
+                            <td>R$ {{ number_format($item['custos'], 2, ',', '.') }}</td>
+                            <td>R$ {{ number_format($item['despesas'], 2, ',', '.') }}</td>
+                            <td>R$ {{ number_format($item['resultado'], 2, ',', '.') }}</td>
+                            <td>{{ number_format($item['margem_resultado_percentual'], 2, ',', '.') }}%</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="muted">Nenhum dado para montar a DRE no periodo.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    @endif
+
+    @if ($mostrar['conciliacao_recebimentos'])
+        <div class="section">
+            <h2>Conciliacao de recebimentos</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Metodo</th>
+                        <th>Previsto (vendas)</th>
+                        <th>Declarado (fechamentos)</th>
+                        <th>Diferenca</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($conciliacaoRecebimentos['linhas'] as $linha)
+                        <tr>
+                            <td>{{ $linha['metodo'] }}</td>
+                            <td>R$ {{ number_format($linha['previsto'], 2, ',', '.') }}</td>
+                            <td>R$ {{ number_format($linha['declarado'], 2, ',', '.') }}</td>
+                            <td>R$ {{ number_format($linha['diferenca'], 2, ',', '.') }}</td>
+                            <td>{{ $linha['status'] }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="muted">Nenhum dado encontrado para conciliacao no periodo.</td>
+                        </tr>
+                    @endforelse
+                    <tr>
+                        <th>TOTAL</th>
+                        <th>R$ {{ number_format($conciliacaoRecebimentos['totais']['previsto'], 2, ',', '.') }}</th>
+                        <th>R$ {{ number_format($conciliacaoRecebimentos['totais']['declarado'], 2, ',', '.') }}</th>
+                        <th>R$ {{ number_format($conciliacaoRecebimentos['totais']['diferenca'], 2, ',', '.') }}</th>
+                        <th>{{ $conciliacaoRecebimentos['totais']['status'] }}</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    @endif
+
     @if ($mostrar['por_centro'])
         <div class="section">
             <h2>Resumo por centro de custo</h2>

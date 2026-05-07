@@ -20,7 +20,9 @@ class VendaItem extends Model
         'codigo_barras',
         'quantidade',
         'valor_unitario_venda',
+        'valor_unitario_custo',
         'subtotal',
+        'subtotal_custo',
     ];
 
     public function compra()
@@ -33,4 +35,3 @@ class VendaItem extends Model
         return $this->belongsTo(Produto::class, 'id_produto', 'id_produto');
     }
 }
-

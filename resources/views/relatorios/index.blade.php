@@ -46,6 +46,18 @@
                     <input class="form-check-input" type="checkbox" name="secoes[]" id="secao_lancamentos" value="lancamentos" {{ $mostrar['lancamentos'] ? 'checked' : '' }}>
                     <label class="form-check-label" for="secao_lancamentos">Lancamentos</label>
                 </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="secoes[]" id="secao_margem_produto" value="margem_produto" {{ $mostrar['margem_produto'] ? 'checked' : '' }}>
+                    <label class="form-check-label" for="secao_margem_produto">Margem por produto</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="secoes[]" id="secao_dre_mensal" value="dre_mensal" {{ $mostrar['dre_mensal'] ? 'checked' : '' }}>
+                    <label class="form-check-label" for="secao_dre_mensal">DRE simplificada mensal</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="secoes[]" id="secao_conciliacao_recebimentos" value="conciliacao_recebimentos" {{ $mostrar['conciliacao_recebimentos'] ? 'checked' : '' }}>
+                    <label class="form-check-label" for="secao_conciliacao_recebimentos">Conciliacao de recebimentos</label>
+                </div>
             </div>
         </div>
         <div class="col-md-2">
@@ -96,6 +108,194 @@
                         <div class="text-muted">Lancamentos</div>
                         <div class="h5 mb-0">{{ $lancamentos->count() }}</div>
                     </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($mostrar['margem_produto'])
+        <div class="row g-3 mt-3">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="text-muted">Receita venda</div>
+                        <div class="h5 mb-0">R$ {{ number_format($resumoMargem['receita_total'], 2, ',', '.') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="text-muted">Custo total</div>
+                        <div class="h5 mb-0">R$ {{ number_format($resumoMargem['custo_total'], 2, ',', '.') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="text-muted">Lucro bruto (periodo)</div>
+                        <div class="h5 mb-0 {{ $resumoMargem['lucro_bruto'] >= 0 ? 'text-success' : 'text-danger' }}">
+                            R$ {{ number_format($resumoMargem['lucro_bruto'], 2, ',', '.') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="text-muted">Margem bruta</div>
+                        <div class="h5 mb-0 {{ $resumoMargem['margem_bruta_percentual'] >= 0 ? 'text-success' : 'text-danger' }}">
+                            {{ number_format($resumoMargem['margem_bruta_percentual'], 2, ',', '.') }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-body">
+                <h2 class="h6 mb-3">Margem por produto</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped table-border table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Codigo de barras</th>
+                                <th>Qtd vendida</th>
+                                <th>Receita</th>
+                                <th>Custo</th>
+                                <th>Lucro bruto</th>
+                                <th>Margem (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($margemProdutos as $item)
+                                <tr>
+                                    <td>{{ $item->nome_produto }}</td>
+                                    <td>{{ $item->codigo_barras ?: '-' }}</td>
+                                    <td>{{ $item->quantidade_total }}</td>
+                                    <td>R$ {{ number_format($item->receita_total, 2, ',', '.') }}</td>
+                                    <td>R$ {{ number_format($item->custo_total, 2, ',', '.') }}</td>
+                                    <td class="{{ $item->lucro_bruto >= 0 ? 'text-success' : 'text-danger' }}">
+                                        R$ {{ number_format($item->lucro_bruto, 2, ',', '.') }}
+                                    </td>
+                                    <td class="{{ $item->margem_percentual >= 0 ? 'text-success' : 'text-danger' }}">
+                                        {{ number_format($item->margem_percentual, 2, ',', '.') }}%
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">
+                                        Nenhuma venda com itens detalhados no periodo.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($mostrar['dre_mensal'])
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-body">
+                <h2 class="h6 mb-3">DRE simplificada mensal</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped table-border table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Mes</th>
+                                <th>Receita</th>
+                                <th>Custos (CMV)</th>
+                                <th>Despesas</th>
+                                <th>Resultado</th>
+                                <th>Margem resultado (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($dreMensal as $item)
+                                <tr>
+                                    <td>{{ $item['mes'] }}</td>
+                                    <td>R$ {{ number_format($item['receita'], 2, ',', '.') }}</td>
+                                    <td>R$ {{ number_format($item['custos'], 2, ',', '.') }}</td>
+                                    <td>R$ {{ number_format($item['despesas'], 2, ',', '.') }}</td>
+                                    <td class="{{ $item['resultado'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                        R$ {{ number_format($item['resultado'], 2, ',', '.') }}
+                                    </td>
+                                    <td class="{{ $item['margem_resultado_percentual'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                        {{ number_format($item['margem_resultado_percentual'], 2, ',', '.') }}%
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        Nenhum dado para montar a DRE no periodo.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($mostrar['conciliacao_recebimentos'])
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-body">
+                <h2 class="h6 mb-3">Conciliacao de recebimentos</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped table-border table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Metodo</th>
+                                <th>Previsto nas vendas</th>
+                                <th>Declarado em fechamentos</th>
+                                <th>Diferenca (declarado - previsto)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($conciliacaoRecebimentos['linhas'] as $linha)
+                                <tr>
+                                    <td>{{ $linha['metodo'] }}</td>
+                                    <td>R$ {{ number_format($linha['previsto'], 2, ',', '.') }}</td>
+                                    <td>R$ {{ number_format($linha['declarado'], 2, ',', '.') }}</td>
+                                    <td class="{{ $linha['diferenca'] == 0.0 ? 'text-success' : 'text-danger' }}">
+                                        R$ {{ number_format($linha['diferenca'], 2, ',', '.') }}
+                                    </td>
+                                    <td>
+                                        <span class="badge {{ $linha['status'] === 'Conciliado' ? 'bg-success' : 'bg-danger' }}">
+                                            {{ $linha['status'] }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">
+                                        Nenhum dado encontrado para conciliacao no periodo.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>TOTAL</th>
+                                <th>R$ {{ number_format($conciliacaoRecebimentos['totais']['previsto'], 2, ',', '.') }}</th>
+                                <th>R$ {{ number_format($conciliacaoRecebimentos['totais']['declarado'], 2, ',', '.') }}</th>
+                                <th class="{{ $conciliacaoRecebimentos['totais']['diferenca'] == 0.0 ? 'text-success' : 'text-danger' }}">
+                                    R$ {{ number_format($conciliacaoRecebimentos['totais']['diferenca'], 2, ',', '.') }}
+                                </th>
+                                <th>
+                                    <span class="badge {{ $conciliacaoRecebimentos['totais']['status'] === 'Conciliado' ? 'bg-success' : 'bg-danger' }}">
+                                        {{ $conciliacaoRecebimentos['totais']['status'] }}
+                                    </span>
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
         </div>

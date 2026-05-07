@@ -168,6 +168,49 @@
                     required
                 >
             </div>
+
+            <div class="col-12">
+                <div class="card border-0 shadow-sm mt-2">
+                    <div class="card-body">
+                        <h2 class="h6 mb-2">Motor de precificacao</h2>
+                        <p class="text-muted small mb-3">
+                            Formula aplicada: <strong>Preco sugerido = Custo / (1 - margem - taxa - imposto)</strong>.
+                            Use percentuais em %.
+                        </p>
+
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-3">
+                                <label for="motor_margem" class="form-label">Margem desejada (%)</label>
+                                <input type="number" step="0.01" min="0" max="99.99" id="motor_margem" class="form-control" value="{{ old('motor_margem', 30) }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="motor_taxa" class="form-label">Taxa operacional (%)</label>
+                                <input type="number" step="0.01" min="0" max="99.99" id="motor_taxa" class="form-control" value="{{ old('motor_taxa', 2.5) }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="motor_imposto" class="form-label">Imposto (%)</label>
+                                <input type="number" step="0.01" min="0" max="99.99" id="motor_imposto" class="form-control" value="{{ old('motor_imposto', 8) }}">
+                            </div>
+                            <div class="col-md-3 d-grid d-md-flex gap-2">
+                                <button type="button" id="motor_calcular" class="btn btn-outline-dark">Calcular</button>
+                                <button type="button" id="motor_aplicar" class="btn btn-dark">Aplicar no preco</button>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="motor_preco_sugerido" class="form-label">Preco sugerido</label>
+                                <input type="text" id="motor_preco_sugerido" class="form-control" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="motor_lucro_estimado" class="form-label">Lucro unitario estimado</label>
+                                <input type="text" id="motor_lucro_estimado" class="form-control" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="motor_status" class="form-label">Status</label>
+                                <input type="text" id="motor_status" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="mt-3 d-flex gap-2">
@@ -180,4 +223,76 @@
         </div>
     </form>
 </div>
+@endsection
+
+@section('script')
+<script>
+    (function () {
+        const precoCompraInput = document.getElementById('preco_compra');
+        const precoVendaInput = document.getElementById('preco_venda');
+        const margemInput = document.getElementById('motor_margem');
+        const taxaInput = document.getElementById('motor_taxa');
+        const impostoInput = document.getElementById('motor_imposto');
+        const calcularBtn = document.getElementById('motor_calcular');
+        const aplicarBtn = document.getElementById('motor_aplicar');
+        const precoSugeridoInput = document.getElementById('motor_preco_sugerido');
+        const lucroEstimadoInput = document.getElementById('motor_lucro_estimado');
+        const statusInput = document.getElementById('motor_status');
+
+        function formatarBRL(valor) {
+            return 'R$ ' + valor.toFixed(2).replace('.', ',');
+        }
+
+        function calcularPrecoSugerido() {
+            const custo = parseFloat(precoCompraInput.value || '0');
+            const margem = parseFloat(margemInput.value || '0') / 100;
+            const taxa = parseFloat(taxaInput.value || '0') / 100;
+            const imposto = parseFloat(impostoInput.value || '0') / 100;
+            const pesoTotal = margem + taxa + imposto;
+            const divisor = 1 - pesoTotal;
+
+            if (custo <= 0) {
+                statusInput.value = 'Informe um custo de compra maior que zero.';
+                precoSugeridoInput.value = '';
+                lucroEstimadoInput.value = '';
+                return null;
+            }
+
+            if (divisor <= 0) {
+                statusInput.value = 'Percentuais invalidos. A soma deve ser menor que 100%.';
+                precoSugeridoInput.value = '';
+                lucroEstimadoInput.value = '';
+                return null;
+            }
+
+            const precoSugerido = custo / divisor;
+            const custoTaxaImposto = precoSugerido * (taxa + imposto);
+            const lucroUnitario = precoSugerido - custo - custoTaxaImposto;
+
+            precoSugeridoInput.value = formatarBRL(precoSugerido);
+            lucroEstimadoInput.value = formatarBRL(lucroUnitario);
+            statusInput.value = 'Preco calculado com sucesso.';
+
+            return precoSugerido;
+        }
+
+        calcularBtn.addEventListener('click', calcularPrecoSugerido);
+
+        aplicarBtn.addEventListener('click', function () {
+            const precoSugerido = calcularPrecoSugerido();
+            if (precoSugerido === null) {
+                return;
+            }
+
+            precoVendaInput.value = precoSugerido.toFixed(2);
+            statusInput.value = 'Preco sugerido aplicado no campo de venda.';
+        });
+
+        [precoCompraInput, margemInput, taxaInput, impostoInput].forEach(function (input) {
+            input.addEventListener('input', calcularPrecoSugerido);
+        });
+
+        calcularPrecoSugerido();
+    })();
+</script>
 @endsection

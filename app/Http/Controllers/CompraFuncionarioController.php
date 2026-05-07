@@ -132,7 +132,10 @@ class CompraFuncionarioController extends Controller
                 foreach ($selecaoLeitor as $idProduto => $quantidadeSelecionada) {
                     $produto = $produtos->get((int) $idProduto);
                     $quantidade = (int) $quantidadeSelecionada;
-                    $subtotal = (float) $produto->preco_venda * $quantidade;
+                    $valorUnitarioVenda = (float) $produto->preco_venda;
+                    $valorUnitarioCusto = (float) $produto->preco_compra;
+                    $subtotal = $valorUnitarioVenda * $quantidade;
+                    $subtotalCusto = $valorUnitarioCusto * $quantidade;
 
                     VendaItem::create([
                         'id_compra' => $compra->id_compra,
@@ -141,8 +144,10 @@ class CompraFuncionarioController extends Controller
                         'lote' => $produto->lote,
                         'codigo_barras' => $produto->codigo_barras,
                         'quantidade' => $quantidade,
-                        'valor_unitario_venda' => $produto->preco_venda,
+                        'valor_unitario_venda' => $valorUnitarioVenda,
+                        'valor_unitario_custo' => $valorUnitarioCusto,
                         'subtotal' => $subtotal,
+                        'subtotal_custo' => $subtotalCusto,
                     ]);
 
                     MovimentacaoProduto::create([
