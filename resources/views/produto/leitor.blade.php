@@ -262,8 +262,7 @@
                                 <th>Produto</th>
                                 <th>Lote</th>
                                 <th>Cod. barras</th>
-                                <th>Estoque</th>
-                                <th>Valor de venda</th>
+                                <th>Valor unitario</th>
                                 <th>Adicionar</th>
                             </tr>
                         </thead>
@@ -274,14 +273,13 @@
                                     <td>{{ $produto->nome }}</td>
                                     <td>{{ $produto->lote ?: '-' }}</td>
                                     <td>{{ $produto->codigo_barras ?: '-' }}</td>
-                                    <td>{{ $produto->quantidade }}</td>
                                     <td>R$ {{ number_format($produto->preco_venda, 2, ',', '.') }}</td>
                                     <td>
                                         <form action="{{ route('leitor.produtos.adicionar') }}" method="post" class="d-flex gap-2">
                                             @csrf
                                             <input type="hidden" name="id_produto" value="{{ $produto->id_produto }}">
                                             <input type="hidden" name="filtro_retorno" value="{{ $filtro }}">
-                                            <input type="number" name="quantidade" class="form-control form-control-sm" style="max-width: 90px;" min="1" max="{{ $produto->quantidade }}" value="1" required>
+                                            <input type="number" name="quantidade" class="form-control form-control-sm" style="max-width: 90px;" min="1" value="1" required>
                                             <button type="submit" class="btn btn-sm btn-outline-dark">Adicionar</button>
                                         </form>
                                     </td>
@@ -306,6 +304,7 @@
                             <tr>
                                 <th>Produto</th>
                                 <th>Qtd</th>
+                                <th>Valor unitario</th>
                                 <th>Subtotal</th>
                                 <th></th>
                             </tr>
@@ -315,6 +314,7 @@
                                 <tr>
                                     <td>{{ $produtoSelecionado->nome }}</td>
                                     <td>{{ $produtoSelecionado->quantidade_selecionada }}</td>
+                                    <td>R$ {{ number_format($produtoSelecionado->preco_venda, 2, ',', '.') }}</td>
                                     <td>R$ {{ number_format($produtoSelecionado->total_item_selecionado, 2, ',', '.') }}</td>
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-1">

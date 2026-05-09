@@ -48,7 +48,7 @@
                             <tr>
                                 <th>Produto</th>
                                 <th>Qtd</th>
-                                <th>Valor de venda</th>
+                                <th>Valor unitario selecionado</th>
                                 <th>Subtotal</th>
                             </tr>
                         </thead>
