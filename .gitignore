@@ -1,0 +1,79 @@
+# =========================
+# Laravel / PHP
+# =========================
+/vendor/
+/bootstrap/cache/*.php
+/storage/*.key
+/storage/logs/*
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/debugbar/*
+
+# Keep directory placeholders tracked
+!/storage/logs/.gitignore
+!/storage/framework/cache/.gitignore
+!/storage/framework/sessions/.gitignore
+!/storage/framework/testing/.gitignore
+!/storage/framework/views/.gitignore
+
+# =========================
+# Front-end / Node
+# =========================
+/node_modules/
+/public/build/
+/public/hot
+
+# Package manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Environment and secrets
+# =========================
+.env
+.env.*
+!.env-example
+!.env.example
+
+# =========================
+# Test, coverage, cache
+# =========================
+.phpunit.result.cache
+.phpunit.cache/
+/coverage/
+/build/
+
+# =========================
+# IDE / Editor
+# =========================
+.idea/
+.vscode/
+*.code-workspace
+*.suo
+*.user
+*.userossc
+*.sln.docstates
+*.swp
+*.swo
+*~
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+PASSO_A_PASSO_IMPLEMENTACAO_SISTEMA.md
+PROPOSTA_COMERCIAL_SISTEMA.md
+
+# =========================
+# Optional local tools
+# =========================
+.php-cs-fixer.cache
+.eslintcache
+.stylelintcache
