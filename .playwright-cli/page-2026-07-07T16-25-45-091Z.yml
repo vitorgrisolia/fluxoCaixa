@@ -1,0 +1,72 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - paragraph [ref=e5]: Fluxo de Caixa
+      - heading [level=1] [ref=e6]: Seu caixa no controle, todos os dias.
+      - paragraph [ref=e7]: Acompanhe compras, estoque, lancamentos, fechamento de caixa e auditoria em um unico painel.
+      - generic [ref=e8]:
+        - article [ref=e9]:
+          - heading [level=2] [ref=e10]: Gestao rapida
+          - paragraph [ref=e11]: Resumo do que importa logo na entrada do sistema.
+        - article [ref=e12]:
+          - heading [level=2] [ref=e13]: Operacao segura
+          - paragraph [ref=e14]: Auditoria completa para saber quem fez o que e quando.
+        - article [ref=e15]:
+          - heading [level=2] [ref=e16]: Financeiro visivel
+          - paragraph [ref=e17]: Relatorios por periodo, centro, tipo e fechamento de caixa.
+      - generic [ref=e18]:
+        - text: Dica dinamica
+        - strong [ref=e19]: Use filtros de periodo para analisar melhor seus resultados.
+        - text: 07/07/2026, 13:25
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - img "Logo do sistema" [ref=e22]
+        - generic [ref=e23]:
+          - paragraph [ref=e24]: Acesso seguro
+          - heading "Entrar no sistema" [level=2] [ref=e25]
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - text: E-mail
+          - textbox "E-mail" [active] [ref=e28]:
+            - /placeholder: seuemail@empresa.com
+        - generic [ref=e29]:
+          - text: Senha
+          - generic [ref=e30]:
+            - textbox "Senha" [ref=e31]:
+              - /placeholder: Digite sua senha
+            - button "Mostrar senha" [ref=e32]: Mostrar
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - checkbox "Lembrar-me" [ref=e35]
+            - text: Lembrar-me
+          - link "Esqueceu sua senha?" [ref=e36] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/forgot-password
+        - button "Acessar painel" [ref=e37]
+  - generic [ref=e38]:
+    - generic [ref=e40]:
+      - generic [ref=e42]:
+        - generic [ref=e43] [cursor=pointer]:  Messages
+        - generic [ref=e44] [cursor=pointer]:  Timeline
+        - generic [ref=e45] [cursor=pointer]:  Exceptions
+        - generic [ref=e46] [cursor=pointer]:  Views2
+        - generic [ref=e47] [cursor=pointer]:  Route
+        - generic [ref=e48] [cursor=pointer]:  Queries0
+        - generic [ref=e49] [cursor=pointer]:  Models0
+        - generic [ref=e50] [cursor=pointer]:  Gate
+        - generic [ref=e51] [cursor=pointer]:  Session
+        - generic [ref=e52] [cursor=pointer]:  Request
+      - generic [ref=e53]:
+        - generic [ref=e57]:
+          - generic [ref=e58]: 
+          - text: 8.2.12
+        - generic [ref=e59]:
+          - generic [ref=e60]: 
+          - text: 473ms
+        - generic [ref=e61]:
+          - generic [ref=e62]: 
+          - text: 20MB
+        - generic [ref=e63]:
+          - generic [ref=e64]: 
+          - text: GET login
+    - text:           
+  - text: 

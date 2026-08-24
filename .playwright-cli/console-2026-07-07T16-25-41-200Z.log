@@ -1,0 +1,13 @@
+[    3502ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/resources/css/app.css:0
+[    3554ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/@vite/client:0
+[    3554ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/resources/js/app.js:0
+[    3775ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "username"): (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:8000/login:0
+[   20766ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/resources/css/app.css:0
+[   20781ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/@vite/client:0
+[   20781ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/resources/js/app.js:0
+[   52446ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/resources/css/app.css:0
+[   52458ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/@vite/client:0
+[   52458ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/resources/js/app.js:0
+[  100392ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/@vite/client:0
+[  100393ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/resources/css/app.css:0
+[  100393ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/resources/js/app.js:0
