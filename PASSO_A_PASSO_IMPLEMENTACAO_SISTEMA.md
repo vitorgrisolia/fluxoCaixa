@@ -1,66 +1,68 @@
-# Passo a Passo de Implementacao - Sistema de Fluxo de Caixa
+# Implementation Step-by-Step - Cash Flow System
 
-## 1. Objetivo
+*[Leia em português](PASSO_A_PASSO_IMPLEMENTACAO_SISTEMA.pt-br.md)*
 
-Este guia organiza a implementacao do sistema em etapas claras para reduzir risco, acelerar onboarding e garantir uma entrada em operacao controlada no pequeno comercio.
+## 1. Purpose
 
-## 2. Pre-implementacao (Planejamento)
+This guide organizes the system implementation into clear stages to reduce risk, speed up onboarding and ensure a controlled go-live at the small retail business.
 
-1. Definir responsaveis:
-- Responsavel tecnico (implantacao)
-- Responsavel operacional do cliente (caixa/estoque/financeiro)
+## 2. Pre-implementation (Planning)
 
-2. Levantar requisitos com o cliente:
-- Quantidade de usuarios (admin e funcionario)
-- Produtos iniciais
-- Regras de fechamento de caixa
-- Necessidade de relatorios especificos
+1. Define responsible parties:
+- Technical lead (deployment)
+- Client-side operational owner (cash register/inventory/finance)
 
-3. Fechar escopo de entrega:
-- Funcionalidades inclusas
-- Itens de personalizacao
-- Treinamentos contratados
-- SLA de suporte
+2. Gather requirements with the client:
+- Number of users (admin and employee)
+- Initial products
+- Cash register closing rules
+- Need for specific reports
 
-## 3. Preparacao de Infraestrutura
+3. Close delivery scope:
+- Included features
+- Customization items
+- Contracted training
+- Support SLA
 
-1. Confirmar requisitos tecnicos:
+## 3. Infrastructure Preparation
+
+1. Confirm technical requirements:
 - PHP 8.2+
 - Composer
 - Node.js + npm
-- MySQL ou MariaDB
+- MySQL or MariaDB
 
-2. Preparar ambiente (local, VPS ou servidor do cliente):
-- Criar banco de dados
-- Definir usuario e senha de acesso
-- Liberar portas e acesso ao sistema
+2. Prepare environment (local, VPS or client server):
+- Create database
+- Define access username and password
+- Open ports and grant system access
 
-3. Definir politicas de seguranca:
-- Senhas fortes
-- Backup do banco
-- Controle de acesso por perfil
+3. Define security policies:
+- Strong passwords
+- Database backup
+- Role-based access control
 
-## 4. Instalacao do Projeto
+## 4. Project Installation
 
-1. Entrar na pasta do projeto:
+1. Enter the project folder:
 
 ```bash
 cd ProjetoFluxo_Caixa
 ```
 
-2. Instalar dependencias PHP:
+2. Install PHP dependencies:
 
 ```bash
 composer install
 ```
 
-3. Criar arquivo de ambiente:
+3. Create the environment file:
 
 ```powershell
 Copy-Item .env-example .env
 ```
 
-4. Configurar banco no `.env`:
+4. Configure the database in `.env`:
 
 ```env
 DB_CONNECTION=mysql
@@ -68,140 +70,140 @@ DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=fluxo_de_caixa
 DB_USERNAME=root
-DB_PASSWORD=sua_senha
+DB_PASSWORD=your_password
 ```
 
-5. Gerar chave da aplicacao:
+5. Generate the application key:
 
 ```bash
 php artisan key:generate
 ```
 
-6. Rodar migrations:
+6. Run migrations:
 
 ```bash
 php artisan migrate
 ```
 
-7. Popular dados iniciais (usuarios e base minima):
+7. Seed initial data (users and minimal base data):
 
 ```bash
 php artisan db:seed
 ```
 
-8. Instalar frontend:
+8. Install the frontend:
 
 ```bash
 npm install
 npm run dev
 ```
 
-9. Subir aplicacao:
+9. Start the application:
 
 ```bash
 php artisan serve
 ```
 
-## 5. Configuracao Inicial no Sistema
+## 5. Initial System Configuration
 
-1. Fazer login com usuario admin padrao:
+1. Log in with the default admin user:
 - `admin@example.com`
 - `senha_admin`
 
-2. Ajustar configuracoes gerais:
-- Nome do sistema
-- Dados da empresa
-- Moeda
-- Mensagem de rodape
+2. Adjust general settings:
+- System name
+- Company data
+- Currency
+- Footer message
 
-3. Cadastrar usuarios reais:
-- Administradores
-- Funcionarios
+3. Register real users:
+- Administrators
+- Employees
 
-4. Revisar permissoes e perfis:
-- Confirmar que admin acessa modulos de gestao
-- Confirmar que funcionario acessa somente operacao
+4. Review permissions and roles:
+- Confirm admin can access management modules
+- Confirm employee can access operational features only
 
-## 6. Carga Inicial de Dados
+## 6. Initial Data Load
 
-1. Cadastrar produtos:
-- Nome
-- Lote
-- Quantidade
-- Tipo de quantidade
-- Validade
-- Preco de compra e venda
+1. Register products:
+- Name
+- Batch
+- Quantity
+- Quantity type
+- Expiration date
+- Purchase and sale price
 
-2. Configurar base financeira:
-- Tipos
-- Centros de custo
-- Lancamentos iniciais (se necessario)
+2. Configure the financial base:
+- Types
+- Cost centers
+- Initial transactions (if needed)
 
-3. Validar estoque:
-- Entradas iniciais
-- Ajustes de quantidade
-- Conferencia de valor total de estoque
+3. Validate inventory:
+- Initial stock-in entries
+- Quantity adjustments
+- Total stock value reconciliation
 
-## 7. Validacao de Fluxos (Homologacao)
+## 7. Flow Validation (User Acceptance Testing)
 
-1. Testar fluxo admin:
+1. Test the admin flow:
 - Dashboard
-- Produtos
-- Estoque
-- Controle financeiro
-- Relatorios
-- Auditoria
+- Products
+- Inventory
+- Financial control
+- Reports
+- Audit trail
 
-2. Testar fluxo funcionario:
-- Leitor de produtos
-- Finalizar compra
-- Historico de compras
-- Fechamento de caixa com logout automatico
+2. Test the employee flow:
+- Product lookup
+- Checkout
+- Purchase history
+- Cash register closing with automatic logout
 
-3. Testar relatorios:
-- Por periodo
-- Por centro de custo
-- Por tipo
-- Fechamento de caixa
-- Auditoria
-- Exportacao CSV/PDF
+3. Test reports:
+- By period
+- By cost center
+- By type
+- Cash register closing
+- Audit trail
+- CSV/PDF export
 
-4. Validar erros e permissoes:
-- Acesso negado (403)
-- Pagina inexistente (404)
-- Tentativas com perfil incorreto
+4. Validate errors and permissions:
+- Access denied (403)
+- Page not found (404)
+- Attempts with the wrong role
 
-## 8. Treinamento do Cliente
+## 8. Client Training
 
-1. Treinamento de administracao:
-- Cadastros e configuracoes
-- Indicadores e relatorios
-- Auditoria e boas praticas
+1. Administration training:
+- Registrations and settings
+- Indicators and reports
+- Audit trail and best practices
 
-2. Treinamento de operacao:
-- Venda/finalizacao de compra
-- Fechamento de caixa
-- Rotina diaria de uso
+2. Operations training:
+- Sales/checkout
+- Cash register closing
+- Daily usage routine
 
-3. Material de apoio:
-- Credenciais iniciais
-- Rotina de abertura/fechamento
-- Contato de suporte
+3. Support materials:
+- Initial credentials
+- Opening/closing routine
+- Support contact
 
-## 9. Go-live (Entrada em Producao)
+## 9. Go-live (Production Rollout)
 
-1. Checklist antes da virada:
-- Backup executado
-- Usuarios validados
-- Produtos carregados
-- Fluxos testados
+1. Checklist before go-live:
+- Backup performed
+- Users validated
+- Products loaded
+- Flows tested
 
-2. Publicacao:
-- Ajustar `APP_ENV=production`
-- Ajustar `APP_DEBUG=false`
-- Configurar URL final do sistema
+2. Publishing:
+- Set `APP_ENV=production`
+- Set `APP_DEBUG=false`
+- Configure the final system URL
 
-3. Otimizacoes de deploy:
+3. Deploy optimizations:
 
 ```bash
 php artisan config:cache
@@ -209,30 +211,31 @@ php artisan route:cache
 php artisan view:cache
 ```
 
-## 10. Pos-go-live e Suporte (12 meses)
+## 10. Post-go-live and Support (12 months)
 
-1. Primeira semana:
-- Acompanhamento diario
-- Correcao rapida de incidentes
+1. First week:
+- Daily monitoring
+- Quick incident resolution
 
-2. Primeiro trimestre:
-- Reunioes de acompanhamento
-- Ajustes de relatorios e fluxo
+2. First quarter:
+- Follow-up meetings
+- Report and flow adjustments
 
-3. Rotina continua:
-- Suporte conforme SLA
-- Atualizacoes corretivas
-- Revisao periodica de performance e seguranca
+3. Ongoing routine:
+- Support per SLA
+- Corrective updates
+- Periodic performance and security review
 
-## 11. Checklist Final de Implementacao
+## 11. Final Implementation Checklist
 
-1. Ambiente configurado
-2. Banco migrado e populado
-3. Configuracoes gerais concluidas
-4. Usuarios e perfis revisados
-5. Produtos e estoque validados
-6. Fluxos admin/funcionario homologados
-7. Relatorios e auditoria funcionando
-8. Treinamento realizado
-9. Go-live concluido
-10. Suporte iniciado
+1. Environment configured
+2. Database migrated and seeded
+3. General settings completed
+4. Users and roles reviewed
+5. Products and inventory validated
+6. Admin/employee flows validated (UAT)
+7. Reports and audit trail working
+8. Training completed
+9. Go-live completed
+10. Support started
+</content>
