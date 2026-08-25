@@ -625,3 +625,176 @@ Passo a passo completo:
 
 - veja [`DEPLOY_RENDER.md`](DEPLOY_RENDER.md)
 </content>
+
+## 12. Novas implementacoes operacionais
+
+### Clientes
+
+- cadastro, edicao e desativacao de clientes;
+- CPF/CNPJ, inscricao estadual e indicador de contribuinte;
+- telefone, e-mail e endereco completo;
+- municipio, UF, CEP e codigo IBGE;
+- selecao opcional do cliente durante a finalizacao da venda;
+- suporte a consumidor nao identificado.
+
+### Itens imutaveis da venda
+
+Os produtos vendidos sao preservados em `compra_itens`. Cada item registra uma fotografia dos dados utilizados no momento da venda:
+
+- produto e codigo;
+- lote e GTIN/EAN;
+- quantidade e unidade;
+- valor unitario, desconto e valor total;
+- NCM, CEST, CFOP e CST/CSOSN;
+- origem da mercadoria.
+
+A edicao posterior do cadastro de um produto nao altera os itens de vendas antigas.
+
+### Concorrencia de estoque
+
+O fechamento da compra utiliza transacao de banco e `lockForUpdate`. Antes de concluir a venda, o sistema bloqueia os produtos selecionados e valida novamente as quantidades, reduzindo o risco de estoque negativo em vendas simultaneas.
+
+Na mesma transacao, o sistema:
+
+1. Cria a compra.
+2. Preserva os itens vendidos.
+3. Registra as movimentacoes de saida.
+4. Atualiza o estoque.
+
+### Estorno formal de venda
+
+- somente o administrador pode estornar;
+- exige motivo entre 10 e 500 caracteres;
+- nao apaga nem edita a venda original;
+- devolve os produtos ao estoque;
+- registra movimentacoes de entrada;
+- altera o status da compra para `estornada`;
+- vendas estornadas nao entram nos totais do fechamento de caixa;
+- vendas com documento fiscal autorizado exigem cancelamento fiscal antes do estorno.
+
+### Fechamento de caixa
+
+Fechamentos concluidos nao podem mais ser editados ou excluidos. O administrador pode reabrir um fechamento com justificativa obrigatoria. O sistema preserva:
+
+- usuario que realizou o fechamento;
+- valores originais;
+- administrador responsavel pela reabertura;
+- data e hora da reabertura;
+- motivo informado.
+
+### Seguranca de rotas
+
+- cadastro publico de usuarios desativado;
+- usuarios administrados pela area restrita;
+- historico de vendas dos funcionarios isolado por usuario;
+- administrador com visao global das vendas;
+- logout por POST;
+- exclusoes administrativas por POST e token CSRF;
+- historico de vendas sem edicao ou exclusao livre.
+
+## 13. Base fiscal implementada
+
+O sistema possui uma base estrutural para NF-e modelo 55 e NFC-e modelo 65.
+
+### Produtos
+
+- codigo de barras/GTIN;
+- NCM e CEST;
+- CFOP;
+- CST/CSOSN;
+- origem da mercadoria;
+- unidade comercial e tributavel;
+- aliquotas de ICMS, PIS, COFINS, IPI e FCP;
+- CST de PIS, COFINS e IPI.
+
+### Emitente
+
+- razao social e CNPJ;
+- inscricao estadual;
+- regime tributario;
+- CNAE;
+- municipio, UF, CEP e codigo IBGE;
+- ambiente de homologacao ou producao;
+- serie e proximo numero de NF-e/NFC-e;
+- CSC e identificador do CSC;
+- dados do responsavel tecnico;
+- identificacao do provedor fiscal.
+
+### Documentos fiscais
+
+- tabela de documentos fiscais vinculada a venda;
+- chave de acesso, protocolo e retorno fiscal;
+- XML de envio e XML autorizado;
+- eventos fiscais;
+- sequencias separadas por modelo, serie e ambiente;
+- reserva transacional da numeracao;
+- solicitacao idempotente por venda, modelo e ambiente;
+- controle de tentativas e proxima tentativa;
+- central administrativa com filtros, status e historico de eventos.
+
+O status `aguardando_integracao` significa somente que a solicitacao e a numeracao foram registradas localmente. Ele nao significa que a nota foi transmitida ou autorizada pela SEFAZ.
+
+## 14. Migrations recentes
+
+- `2026_08_25_000000_add_fiscal_sales_foundation.php`: clientes, itens da compra, campos fiscais e documentos fiscais.
+- `2026_08_25_010000_add_operational_fiscal_hardening.php`: tributos, reabertura de caixa, eventos e sequencias.
+- `2026_08_25_020000_add_fiscal_request_control.php`: idempotencia, tentativas e controle da solicitacao fiscal.
+
+Para atualizar uma instalacao existente:
+
+```powershell
+php artisan migrate
+php artisan optimize:clear
+```
+
+## 15. Testes adicionados
+
+Foram adicionados testes para:
+
+- bloqueio do cadastro publico;
+- persistencia dos itens da venda;
+- baixa e movimentacao do estoque;
+- estorno e devolucao dos produtos ao estoque;
+- idempotencia da solicitacao fiscal;
+- avanco unico da sequencia fiscal.
+
+Os testes usam `RefreshDatabase`. Configure um banco exclusivo em `.env.testing`. Nunca execute a suite apontando para o banco de desenvolvimento ou producao.
+
+```powershell
+php artisan test
+```
+
+## 16. Pendencias para emissao fiscal real
+
+A estrutura local nao substitui a autorizacao da SEFAZ. Ainda e necessario:
+
+1. Definir UF, regime tributario e regras fiscais com o contador.
+2. Escolher NF-e, NFC-e ou ambas.
+3. Contratar uma API fiscal ou implementar comunicacao direta com a SEFAZ.
+4. Configurar certificado digital A1 e senha em armazenamento seguro.
+5. Configurar CSC e credenciais de homologacao para NFC-e.
+6. Validar ICMS, PIS, COFINS, IPI, FCP e substituicao tributaria.
+7. Gerar, validar, assinar e transmitir o XML oficial.
+8. Tratar autorizacao, rejeicao, consulta, cancelamento e inutilizacao.
+9. Implementar contingencia, fila de retentativas e reenvio.
+10. Gerar DANFE, DANFE NFC-e e QR Code.
+11. Enviar XML/DANFE por e-mail e aplicar retencao legal.
+12. Homologar todos os cenarios na SEFAZ antes da producao.
+
+Nunca salve certificados, senhas, CSC ou credenciais fiscais no repositorio Git.
+
+## 17. Pendencias para comercializacao
+
+- atualizar Laravel, PHP e dependencias para versoes suportadas;
+- implementar permissoes granulares alem de admin e funcionario;
+- adicionar isolamento multiempresa antes de oferecer como SaaS;
+- concluir e homologar a integracao fiscal;
+- configurar HTTPS e `APP_DEBUG=false`;
+- aplicar limite de tentativas de login e cabecalhos de seguranca;
+- configurar backup automatico e testar a restauracao;
+- adicionar monitoramento de erros e disponibilidade;
+- revisar LGPD, privacidade, retencao e resposta a incidentes;
+- preparar licenca, contrato, SLA e processo de suporte;
+- criar manual operacional e treinamento;
+- executar testes de carga, seguranca e recuperacao;
+- realizar piloto controlado antes da comercializacao.

@@ -17,6 +17,9 @@ Laravel 9 web application for financial and operational control, with role-based
 - [9. Useful SQL](#9-useful-sql)
 - [10. Troubleshooting](#10-troubleshooting)
 - [11. Deploy on Render](#11-deploy-on-render)
+- [12. Fiscal foundation and sales safety](#12-fiscal-foundation-and-sales-safety)
+- [13. Commercial readiness checklist](#13-commercial-readiness-checklist)
+- [14. Implemented operational evolution](#14-implemented-operational-evolution)
 
 ## 1. System purpose
 
@@ -626,68 +629,82 @@ Full step-by-step guide:
 
 - see [`DEPLOY_RENDER.md`](DEPLOY_RENDER.md)
 
-## 12. Base fiscal e segurança das vendas
+## 12. Fiscal foundation and sales safety
 
-O projeto possui uma base preparada para integrar NF-e/NFC-e:
+The project includes a foundation for future NF-e/NFC-e integration:
 
-- itens da venda gravados em `compra_itens`, mantendo nome, quantidade, preço e classificação fiscal usados no momento da compra
-- baixa de estoque e gravação da venda executadas na mesma transação de banco
-- cadastro fiscal de produtos com código de barras, NCM, CEST, CFOP, CST/CSOSN, origem e unidade comercial
-- configuração do emitente com CNPJ, inscrição estadual, regime tributário, município, UF, ambiente, séries e numeração
-- estruturas de clientes e documentos fiscais
-- histórico de compras somente para consulta, sem edição ou exclusão manual
-- cadastro público de usuários desativado; usuários são administrados pela área restrita
-- logout e exclusões administrativas protegidos por requisição POST e token CSRF
+- immutable sale snapshots in `compra_itens`, including product, quantity, prices, discount, batch, GTIN and fiscal classification
+- sale, inventory movement and stock reduction in the same database transaction
+- row locking during checkout to prevent concurrent stock overselling
+- fiscal product fields for barcode, NCM, CEST, CFOP, CST/CSOSN, origin, units and tax rates
+- issuer settings for CNPJ, state registration, tax regime, municipality, state, environment, series and numbering
+- customer registration and optional customer selection at checkout
+- fiscal documents, events and transactionally locked numbering sequences
+- one fiscal request per sale, model and environment, preventing duplicate requests
+- read-only sales history; completed sales are reversed instead of edited or deleted
+- stock restoration when a sale is reversed, with a mandatory reason
+- authorized fiscal documents must be cancelled before their sale can be reversed
+- immutable cash closing; an admin may reopen it only with a recorded reason
+- public user registration disabled; accounts are managed by an admin
+- logout and administrative destructive actions use POST requests and CSRF protection
+- administrative fiscal document dashboard with status and event history
 
-Para atualizar um ambiente existente:
+To update an existing environment:
 
 ```bash
 php artisan migrate
 php artisan optimize:clear
 ```
 
-### Emissão fiscal ainda pendente
+### Fiscal issuance still pending
 
-A existência das tabelas fiscais não autoriza uma nota na SEFAZ. Antes de vender o sistema com emissão fiscal, ainda é necessário:
+The database structures do not authorize an invoice at SEFAZ. The status `aguardando_integracao` only means that a local request and number reservation exist. It does not mean that an invoice was transmitted or authorized.
 
-1. Definir a UF do emitente, o regime tributário e validar as regras com o contador.
-2. Escolher NF-e modelo 55, NFC-e modelo 65 ou ambas.
-3. Escolher um provedor fiscal ou implementar comunicação direta com a SEFAZ.
-4. Configurar certificado digital A1, CSC e credenciais de homologação.
-5. Implementar cálculo tributário por produto e operação.
-6. Gerar, assinar, transmitir e armazenar XML autorizado.
-7. Implementar consulta, rejeição, cancelamento, inutilização, contingência e reenvio.
-8. Gerar DANFE/DANFE NFC-e e permitir download do XML pelo usuário autorizado.
-9. Homologar todos os cenários na SEFAZ antes de ativar o ambiente de produção.
+Real issuance still requires:
 
-Nunca salve certificado, senha, CSC ou credenciais fiscais no repositório Git. Use variáveis de ambiente ou um serviço seguro de segredos.
+1. Define the issuer state, tax regime and operation rules with an accountant.
+2. Choose NF-e model 55, NFC-e model 65 or both.
+3. Choose a fiscal API provider or implement direct SEFAZ communication.
+4. Securely configure an A1 certificate, password, CSC and homologation credentials.
+5. Validate ICMS, PIS, COFINS, IPI, FCP and tax substitution rules.
+6. Generate, validate, sign, transmit and store authorized XML files.
+7. Implement status queries, rejection handling, cancellation, number invalidation, contingency and retries.
+8. Generate DANFE/DANFE NFC-e, NFC-e QR Code and authorized XML downloads.
+9. Send fiscal documents by email and enforce the legal retention policy.
+10. Complete SEFAZ homologation before enabling production.
 
-## 13. Checklist para comercialização
+Never commit certificates, passwords, CSC tokens or fiscal credentials. Use environment variables or a managed secret store.
 
-- atualizar Laravel, PHP e dependências para versões com suporte de segurança
-- criar testes automatizados em banco exclusivo de testes para login, permissões, vendas, estoque, caixa e emissão fiscal
-- configurar HTTPS, backup automático e teste periódico de restauração
-- adicionar logs, monitoramento, alertas e rastreabilidade das operações críticas
-- revisar LGPD, política de privacidade, termos de uso e retenção de dados
-- definir licença, contrato, suporte, atualizações e responsabilidades fiscais
-- preparar instalação automatizada, documentação operacional e treinamento
-- executar testes de carga, segurança e recuperação de falhas
+## 13. Commercial readiness checklist
 
-Os testes de banco usam `RefreshDatabase`. Configure um banco separado em `.env.testing`; nunca aponte a suíte para o banco de produção.
+- upgrade Laravel, PHP and dependencies to supported versions
+- add granular permissions beyond the current admin/employee roles
+- add multi-company isolation before offering the application as SaaS
+- run automated tests in an isolated test database for authentication, permissions, checkout, concurrency, inventory, cash closing, reports and fiscal workflows
+- configure HTTPS, `APP_DEBUG=false`, secure headers and login rate limiting
+- configure automated backups and periodically test restoration
+- add error monitoring, availability checks, alerts and operational runbooks
+- review LGPD requirements, privacy policy, terms, retention and incident procedures
+- define licensing, support, updates, SLA and fiscal responsibility contracts
+- prepare automated installation, operating documentation and user training
+- perform load, security and disaster recovery tests
+- conduct a controlled pilot before commercial production
 
-## 14. Evolucao operacional implementada
+Database tests use `RefreshDatabase`. Configure a dedicated database in `.env.testing`; never point the test suite to development or production data.
 
-- cadastro completo de clientes e selecao opcional no fechamento da venda
-- estorno formal de venda, com motivo obrigatorio, bloqueio transacional e devolucao ao estoque
-- bloqueio de estorno quando existe documento fiscal autorizado
-- fechamento de caixa imutavel, substituindo edicao/exclusao por reabertura administrativa justificada
-- vendas estornadas excluidas dos totais de fechamento
-- campos tributarios adicionais de ICMS, PIS, COFINS, IPI e FCP
-- eventos e sequencias fiscais com reserva transacional de numeracao
-- solicitacao fiscal idempotente por venda, modelo e ambiente
-- central de documentos fiscais com status e historico de eventos
+## 14. Implemented operational evolution
 
-O status `aguardando_integracao` significa que a solicitacao e a numeracao foram registradas localmente. Ele nao significa que a nota foi transmitida ou autorizada pela SEFAZ.
+The migrations below add the fiscal and operational foundation:
 
-Para concluir a emissao real ainda e obrigatorio contratar/configurar o provedor fiscal, instalar o certificado A1 com armazenamento seguro, parametrizar os impostos com o contador e homologar na SEFAZ da UF emitente.
-</content>
+- `2026_08_25_000000_add_fiscal_sales_foundation.php`
+- `2026_08_25_010000_add_operational_fiscal_hardening.php`
+- `2026_08_25_020000_add_fiscal_request_control.php`
+
+Main new screens:
+
+- **Customers:** registration, editing and deactivation
+- **Sales:** global admin view, employee isolation, item snapshots and formal reversal
+- **Cash closing:** immutable closing and justified admin reopening
+- **Fiscal documents:** request registration, status filtering, numbering and event history
+
+Automated coverage includes sale item persistence, stock reduction, reversal stock restoration and fiscal request idempotency. These tests must be run only against an isolated test database.
