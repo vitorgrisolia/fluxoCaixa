@@ -35,6 +35,18 @@
                 @csrf
 
                 <div class="mb-3">
+                    <label for="id_cliente" class="form-label">Cliente (opcional)</label>
+                    <select name="id_cliente" id="id_cliente" class="form-select">
+                        <option value="">Consumidor nao identificado</option>
+                        @foreach($clientes as $cliente)
+                            <option value="{{ $cliente->id_cliente }}" {{ (string) old('id_cliente') === (string) $cliente->id_cliente ? 'selected' : '' }}>
+                                {{ $cliente->nome }}{{ $cliente->cpf_cnpj ? ' - '.$cliente->cpf_cnpj : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
                     <label class="form-label">Produtos selecionados no leitor</label>
                     <table class="table table-sm table-striped align-middle">
                         <thead>

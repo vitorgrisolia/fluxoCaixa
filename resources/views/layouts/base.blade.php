@@ -68,6 +68,14 @@
                                 <i class="bi bi-people-fill"></i>
                                 Usuarios
                             </a>
+                            <a class="nav-link {{ $isRoute('cliente.*') ? 'is-active' : '' }}" href="{{ route('cliente.index') }}" @if($isRoute('cliente.*')) aria-current="page" @endif>
+                                <i class="bi bi-person-vcard-fill"></i>
+                                Clientes
+                            </a>
+                            <a class="nav-link {{ $isRoute('leitor.historico.*') ? 'is-active' : '' }}" href="{{ route('leitor.historico.index') }}" @if($isRoute('leitor.historico.*')) aria-current="page" @endif>
+                                <i class="bi bi-receipt"></i>
+                                Vendas
+                            </a>
                             <a class="nav-link {{ $isRoute('produto.*') ? 'is-active' : '' }}" href="{{ route('produto.index') }}" @if($isRoute('produto.*')) aria-current="page" @endif>
                                 <i class="bi bi-box-seam"></i>
                                 Produtos
@@ -83,6 +91,10 @@
                             <a class="nav-link {{ $isRoute('configuracoes.*') ? 'is-active' : '' }}" href="{{ route('configuracoes.index') }}" @if($isRoute('configuracoes.*')) aria-current="page" @endif>
                                 <i class="bi bi-gear-fill"></i>
                                 Configuracoes
+                            </a>
+                            <a class="nav-link {{ $isRoute('documentos-fiscais.*') ? 'is-active' : '' }}" href="{{ route('documentos-fiscais.index') }}" @if($isRoute('documentos-fiscais.*')) aria-current="page" @endif>
+                                <i class="bi bi-file-earmark-check-fill"></i>
+                                Notas fiscais
                             </a>
                             <a class="nav-link {{ $isRoute('auditoria.*') ? 'is-active' : '' }}" href="{{ route('auditoria.index') }}" @if($isRoute('auditoria.*')) aria-current="page" @endif>
                                 <i class="bi bi-shield-check"></i>
@@ -118,10 +130,13 @@
                             <i class="bi bi-person-circle"></i>
                             Perfil
                         </a>
-                        <a class="nav-link" href="{{ route('logout') }}">
-                            <i class="bi bi-box-arrow-right"></i>
-                            Sair
-                        </a>
+                        <form action="{{ route('logout') }}" method="post" class="d-flex">
+                            @csrf
+                            <button type="submit" class="nav-link border-0 bg-transparent">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Sair
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Produto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 
 class ProdutoController extends Controller
 {
@@ -185,11 +186,18 @@ class ProdutoController extends Controller
         $dados = $request->validate([
             'nome' => ['required', 'string', 'max:255'],
             'lote' => ['required', 'string', 'max:100'],
+            'codigo_barras' => ['nullable', 'digits_between:8,14', 'unique:produtos,codigo_barras'],
             'quantidade' => ['required', 'integer', 'min:0'],
             'tipo_quantidade' => ['required', 'in:caixa,unidade'],
             'validade' => ['required', 'date'],
             'preco_compra' => ['required', 'numeric', 'min:0'],
             'preco_venda' => ['required', 'numeric', 'min:0'],
+            'ncm' => ['nullable', 'digits:8'],
+            'cest' => ['nullable', 'digits:7'],
+            'cfop' => ['nullable', 'digits:4'],
+            'cst_csosn' => ['nullable', 'string', 'max:4'],
+            'origem_mercadoria' => ['nullable', 'integer', 'min:0', 'max:8'],
+            'unidade_comercial' => ['required', 'string', 'max:10'],
         ]);
 
         $produto = new Produto();
@@ -213,11 +221,22 @@ class ProdutoController extends Controller
         $dados = $request->validate([
             'nome' => ['required', 'string', 'max:255'],
             'lote' => ['required', 'string', 'max:100'],
+            'codigo_barras' => [
+                'nullable',
+                'digits_between:8,14',
+                Rule::unique('produtos', 'codigo_barras')->ignore($produto->id_produto, 'id_produto'),
+            ],
             'quantidade' => ['required', 'integer', 'min:0'],
             'tipo_quantidade' => ['required', 'in:caixa,unidade'],
             'validade' => ['required', 'date'],
             'preco_compra' => ['required', 'numeric', 'min:0'],
             'preco_venda' => ['required', 'numeric', 'min:0'],
+            'ncm' => ['nullable', 'digits:8'],
+            'cest' => ['nullable', 'digits:7'],
+            'cfop' => ['nullable', 'digits:4'],
+            'cst_csosn' => ['nullable', 'string', 'max:4'],
+            'origem_mercadoria' => ['nullable', 'integer', 'min:0', 'max:8'],
+            'unidade_comercial' => ['required', 'string', 'max:10'],
         ]);
 
         $produto->fill($dados);

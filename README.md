@@ -625,4 +625,69 @@ Files added for deployment:
 Full step-by-step guide:
 
 - see [`DEPLOY_RENDER.md`](DEPLOY_RENDER.md)
+
+## 12. Base fiscal e segurança das vendas
+
+O projeto possui uma base preparada para integrar NF-e/NFC-e:
+
+- itens da venda gravados em `compra_itens`, mantendo nome, quantidade, preço e classificação fiscal usados no momento da compra
+- baixa de estoque e gravação da venda executadas na mesma transação de banco
+- cadastro fiscal de produtos com código de barras, NCM, CEST, CFOP, CST/CSOSN, origem e unidade comercial
+- configuração do emitente com CNPJ, inscrição estadual, regime tributário, município, UF, ambiente, séries e numeração
+- estruturas de clientes e documentos fiscais
+- histórico de compras somente para consulta, sem edição ou exclusão manual
+- cadastro público de usuários desativado; usuários são administrados pela área restrita
+- logout e exclusões administrativas protegidos por requisição POST e token CSRF
+
+Para atualizar um ambiente existente:
+
+```bash
+php artisan migrate
+php artisan optimize:clear
+```
+
+### Emissão fiscal ainda pendente
+
+A existência das tabelas fiscais não autoriza uma nota na SEFAZ. Antes de vender o sistema com emissão fiscal, ainda é necessário:
+
+1. Definir a UF do emitente, o regime tributário e validar as regras com o contador.
+2. Escolher NF-e modelo 55, NFC-e modelo 65 ou ambas.
+3. Escolher um provedor fiscal ou implementar comunicação direta com a SEFAZ.
+4. Configurar certificado digital A1, CSC e credenciais de homologação.
+5. Implementar cálculo tributário por produto e operação.
+6. Gerar, assinar, transmitir e armazenar XML autorizado.
+7. Implementar consulta, rejeição, cancelamento, inutilização, contingência e reenvio.
+8. Gerar DANFE/DANFE NFC-e e permitir download do XML pelo usuário autorizado.
+9. Homologar todos os cenários na SEFAZ antes de ativar o ambiente de produção.
+
+Nunca salve certificado, senha, CSC ou credenciais fiscais no repositório Git. Use variáveis de ambiente ou um serviço seguro de segredos.
+
+## 13. Checklist para comercialização
+
+- atualizar Laravel, PHP e dependências para versões com suporte de segurança
+- criar testes automatizados em banco exclusivo de testes para login, permissões, vendas, estoque, caixa e emissão fiscal
+- configurar HTTPS, backup automático e teste periódico de restauração
+- adicionar logs, monitoramento, alertas e rastreabilidade das operações críticas
+- revisar LGPD, política de privacidade, termos de uso e retenção de dados
+- definir licença, contrato, suporte, atualizações e responsabilidades fiscais
+- preparar instalação automatizada, documentação operacional e treinamento
+- executar testes de carga, segurança e recuperação de falhas
+
+Os testes de banco usam `RefreshDatabase`. Configure um banco separado em `.env.testing`; nunca aponte a suíte para o banco de produção.
+
+## 14. Evolucao operacional implementada
+
+- cadastro completo de clientes e selecao opcional no fechamento da venda
+- estorno formal de venda, com motivo obrigatorio, bloqueio transacional e devolucao ao estoque
+- bloqueio de estorno quando existe documento fiscal autorizado
+- fechamento de caixa imutavel, substituindo edicao/exclusao por reabertura administrativa justificada
+- vendas estornadas excluidas dos totais de fechamento
+- campos tributarios adicionais de ICMS, PIS, COFINS, IPI e FCP
+- eventos e sequencias fiscais com reserva transacional de numeracao
+- solicitacao fiscal idempotente por venda, modelo e ambiente
+- central de documentos fiscais com status e historico de eventos
+
+O status `aguardando_integracao` significa que a solicitacao e a numeracao foram registradas localmente. Ele nao significa que a nota foi transmitida ou autorizada pela SEFAZ.
+
+Para concluir a emissao real ainda e obrigatorio contratar/configurar o provedor fiscal, instalar o certificado A1 com armazenamento seguro, parametrizar os impostos com o contador e homologar na SEFAZ da UF emitente.
 </content>

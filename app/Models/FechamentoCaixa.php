@@ -24,7 +24,13 @@ class FechamentoCaixa extends Model
         'total_saidas',
         'saldo_final',
         'observacoes',
+        'status',
+        'reaberto_por',
+        'reaberto_em',
+        'motivo_reabertura',
     ];
+
+    protected $casts = ['reaberto_em' => 'datetime'];
 
     public function usuario()
     {

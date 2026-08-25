@@ -34,6 +34,7 @@
             <thead>
                 <tr>
                     <th>Acoes</th>
+                    <th>Status</th>
                     <th>Data</th>
                     @if ($isAdmin)
                         <th>Funcionario</th>
@@ -53,16 +54,11 @@
                             <a href="{{ route('fechamento-caixa.show', ['id' => $fechamento->id_fechamento]) }}" class="btn btn-dark btn-sm">
                                 Ver
                             </a>
-                            <a href="{{ route('fechamento-caixa.edit', ['id' => $fechamento->id_fechamento]) }}" class="btn btn-success btn-sm">
-                                Editar
-                            </a>
-                            <form action="{{ route('fechamento-caixa.destroy', ['id' => $fechamento->id_fechamento]) }}" method="post">
-                                @csrf
-                                <button type="submit" class="btn btn-danger btn-sm">
-                                    Excluir
-                                </button>
-                            </form>
+                            @if($isAdmin && $fechamento->status === 'fechado')
+                                <button class="btn btn-warning btn-sm" data-bs-toggle="collapse" data-bs-target="#reabrir-{{ $fechamento->id_fechamento }}">Reabrir</button>
+                            @endif
                         </td>
+                        <td><span class="badge {{ $fechamento->status === 'fechado' ? 'bg-success' : 'bg-warning text-dark' }}">{{ ucfirst($fechamento->status) }}</span></td>
                         <td>{{ \Carbon\Carbon::parse($fechamento->data_fechamento)->format('d/m/Y') }}</td>
                         @if ($isAdmin)
                             <td>{{ optional($fechamento->usuario)->nome ?? '---' }}</td>
@@ -74,9 +70,17 @@
                         <td>R$ {{ number_format($fechamento->valor_outros, 2, ',', '.') }}</td>
                         <td>R$ {{ number_format($fechamento->saldo_final, 2, ',', '.') }}</td>
                     </tr>
+                    @if($isAdmin && $fechamento->status === 'fechado')
+                        <tr class="collapse" id="reabrir-{{ $fechamento->id_fechamento }}"><td colspan="10">
+                            <form class="d-flex gap-2" method="post" action="{{ route('fechamento-caixa.reabrir', $fechamento->id_fechamento) }}">@csrf
+                                <input class="form-control" name="motivo_reabertura" minlength="10" maxlength="500" placeholder="Informe o motivo da reabertura" required>
+                                <button class="btn btn-warning">Confirmar</button>
+                            </form>
+                        </td></tr>
+                    @endif
                 @empty
                     <tr>
-                        <td colspan="{{ $isAdmin ? 9 : 8 }}" class="text-center text-muted">
+                        <td colspan="{{ $isAdmin ? 10 : 9 }}" class="text-center text-muted">
                             Nenhum fechamento de caixa registrado.
                         </td>
                     </tr>

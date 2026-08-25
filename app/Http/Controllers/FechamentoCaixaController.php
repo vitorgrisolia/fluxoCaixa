@@ -72,56 +72,23 @@ class FechamentoCaixaController extends Controller
         return view('fechamentoCaixa.show')->with(compact('fechamento'));
     }
 
-    public function edit(int $id)
+    public function reabrir(Request $request, int $id)
     {
+        abort_unless(Auth::user()->tipo_usuario === 'admin', 403);
+        $dados = $request->validate(['motivo_reabertura' => ['required', 'string', 'min:10', 'max:500']]);
         $fechamento = FechamentoCaixa::findOrFail($id);
-        $this->garantirPermissao($fechamento);
-
-        return view('fechamentoCaixa.form')->with(compact('fechamento'));
-    }
-
-    public function update(Request $request, int $id)
-    {
-        $fechamento = FechamentoCaixa::findOrFail($id);
-        $this->garantirPermissao($fechamento);
-
-        $usuario = Auth::user();
-        $permitirTotais = $usuario->tipo_usuario === 'admin';
-        $dados = $this->validarDados($request, $permitirTotais);
-
-        if (! $permitirTotais) {
-            $dados['valor_dinheiro'] = $fechamento->valor_dinheiro;
-            $dados['valor_cartao'] = $fechamento->valor_cartao;
-            $dados['valor_pix'] = $fechamento->valor_pix;
-            $dados['valor_outros'] = $fechamento->valor_outros;
-            $dados['total_entradas'] = $fechamento->total_entradas;
+        if ($fechamento->status !== 'fechado') {
+            return back()->with('danger', 'Este caixa ja foi reaberto.');
         }
-
-        $fechamento->fill($dados);
-        $fechamento->total_saidas = (float) ($dados['total_saidas'] ?? $fechamento->total_saidas ?? 0);
-        if ($permitirTotais) {
-            $fechamento->valor_dinheiro = (float) $fechamento->valor_dinheiro;
-            $fechamento->valor_cartao = (float) $fechamento->valor_cartao;
-            $fechamento->valor_pix = (float) $fechamento->valor_pix;
-            $fechamento->valor_outros = (float) $fechamento->valor_outros;
-            $fechamento->total_entradas = $fechamento->valor_dinheiro + $fechamento->valor_cartao + $fechamento->valor_pix + $fechamento->valor_outros;
-        }
-        $fechamento->saldo_final = $this->calcularSaldoFinal($fechamento->saldo_inicial, $fechamento->total_entradas, $fechamento->total_saidas);
-        $fechamento->save();
+        $fechamento->update([
+            'status' => 'reaberto',
+            'reaberto_por' => Auth::id(),
+            'reaberto_em' => now(),
+            'motivo_reabertura' => $dados['motivo_reabertura'],
+        ]);
 
         return redirect()->route('fechamento-caixa.index')
-            ->with('success', 'Fechamento de caixa atualizado com sucesso.');
-    }
-
-    public function destroy(int $id)
-    {
-        $fechamento = FechamentoCaixa::findOrFail($id);
-        $this->garantirPermissao($fechamento);
-
-        $fechamento->delete();
-
-        return redirect()->route('fechamento-caixa.index')
-            ->with('danger', 'Fechamento de caixa excluido com sucesso.');
+            ->with('success', 'Caixa reaberto com justificativa registrada.');
     }
 
     private function validarDados(Request $request, bool $permitirTotais): array
@@ -163,6 +130,7 @@ class FechamentoCaixaController extends Controller
     private function calcularTotaisPagamento(int $idUser, Carbon $inicio, Carbon $fim): array
     {
         $baseQuery = Compra::where('id_user', $idUser)
+            ->where('status', 'concluida')
             ->whereBetween('data_compra', [$inicio, $fim]);
 
         $valorDinheiro = (float) (clone $baseQuery)->where('forma_pagamento', 'dinheiro')->sum('valor_total');

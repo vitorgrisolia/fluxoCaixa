@@ -77,6 +77,12 @@
                 >
             </div>
 
+            <div class="col-md-3">
+                <label for="codigo_barras" class="form-label">Codigo de barras (GTIN/EAN):</label>
+                <input type="text" name="codigo_barras" id="codigo_barras" class="form-control"
+                    maxlength="14" value="{{ old('codigo_barras', $produto ? $produto->codigo_barras : '') }}">
+            </div>
+
             <div class="col-md-2">
                 <label for="quantidade" class="form-label">Quantidade:</label>
                 <input
@@ -142,6 +148,42 @@
                     value="{{ old('preco_venda', $produto ? $produto->preco_venda : 0) }}"
                     required
                 >
+            </div>
+
+            <div class="col-12 mt-4">
+                <h2 class="h5">Classificacao fiscal</h2>
+                <p class="text-muted mb-0">Preencha conforme orientacao do contador antes de emitir documentos fiscais.</p>
+            </div>
+
+            <div class="col-md-2">
+                <label for="ncm" class="form-label">NCM:</label>
+                <input type="text" name="ncm" id="ncm" class="form-control" maxlength="8"
+                    value="{{ old('ncm', $produto ? $produto->ncm : '') }}">
+            </div>
+            <div class="col-md-2">
+                <label for="cest" class="form-label">CEST:</label>
+                <input type="text" name="cest" id="cest" class="form-control" maxlength="7"
+                    value="{{ old('cest', $produto ? $produto->cest : '') }}">
+            </div>
+            <div class="col-md-2">
+                <label for="cfop" class="form-label">CFOP:</label>
+                <input type="text" name="cfop" id="cfop" class="form-control" maxlength="4"
+                    value="{{ old('cfop', $produto ? $produto->cfop : '') }}">
+            </div>
+            <div class="col-md-2">
+                <label for="cst_csosn" class="form-label">CST/CSOSN:</label>
+                <input type="text" name="cst_csosn" id="cst_csosn" class="form-control" maxlength="4"
+                    value="{{ old('cst_csosn', $produto ? $produto->cst_csosn : '') }}">
+            </div>
+            <div class="col-md-2">
+                <label for="origem_mercadoria" class="form-label">Origem (0 a 8):</label>
+                <input type="number" name="origem_mercadoria" id="origem_mercadoria" class="form-control" min="0" max="8"
+                    value="{{ old('origem_mercadoria', $produto ? $produto->origem_mercadoria : 0) }}">
+            </div>
+            <div class="col-md-2">
+                <label for="unidade_comercial" class="form-label">Unidade fiscal:</label>
+                <input type="text" name="unidade_comercial" id="unidade_comercial" class="form-control" maxlength="10"
+                    value="{{ old('unidade_comercial', $produto ? $produto->unidade_comercial : 'UN') }}" required>
             </div>
         </div>
 

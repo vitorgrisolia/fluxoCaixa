@@ -28,9 +28,11 @@
                         <a href="{{ route('centro.edit', ['id'=>$centro->id_centro_custo]) }}" class="btn btn-success">
                             Editar
                         </a>
-                        <a href="{{ route('centro.destroy', ['id'=>$centro->id_centro_custo]) }}" class="btn btn-danger">
-                            Excluir
-                        </a>
+                        <form action="{{ route('centro.destroy', ['id'=>$centro->id_centro_custo]) }}" method="post" class="d-inline"
+                            onsubmit="return confirm('Deseja realmente excluir este centro de custo?');">
+                            @csrf
+                            <button type="submit" class="btn btn-danger">Excluir</button>
+                        </form>
                     </td>
                     <td>{{ $centro->id_centro_custo }}</td>
                     <td>{{ $centro->tipo->tipo      }}</td>

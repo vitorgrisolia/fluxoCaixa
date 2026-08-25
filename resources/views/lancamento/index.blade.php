@@ -65,9 +65,11 @@
                         <a href="{{ route('lancamento.edit', ['id'=>$lancamento->id_lancamento]) }}" class="btn btn-success">
                             Editar
                         </a>
-                        <a href="{{ route('lancamento.destroy', ['id'=>$lancamento->id_lancamento]) }}" class="btn btn-danger mt-2">
-                            Excluir
-                        </a>
+                        <form action="{{ route('lancamento.destroy', ['id'=>$lancamento->id_lancamento]) }}" method="post" class="d-inline"
+                            onsubmit="return confirm('Deseja realmente excluir este lancamento?');">
+                            @csrf
+                            <button type="submit" class="btn btn-danger mt-2">Excluir</button>
+                        </form>
                     </td>
                     <td>{{ $lancamento->id_lancamento                 }}</td>
                     <td>{{ $lancamento->dt_faturamento->format('d/m/Y')      }}</td>

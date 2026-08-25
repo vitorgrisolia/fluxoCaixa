@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Compra;
+use App\Models\CompraItem;
+use App\Models\Cliente;
 use App\Models\MovimentacaoProduto;
 use App\Models\Produto;
 use Illuminate\Database\Eloquent\Collection;
@@ -26,7 +28,9 @@ class CompraFuncionarioController extends Controller
 
         $totalCompra = $this->calcularTotalCompra($itensSelecionados);
 
-        return view('compra.finalizar')->with(compact('totalCompra', 'itensSelecionados'));
+        $clientes = Cliente::orderBy('nome')->get(['id_cliente', 'nome', 'cpf_cnpj']);
+
+        return view('compra.finalizar')->with(compact('totalCompra', 'itensSelecionados', 'clientes'));
     }
 
     public function store(Request $request)
@@ -35,6 +39,7 @@ class CompraFuncionarioController extends Controller
             'forma_pagamento' => ['required', 'in:pix,dinheiro,cartao_debito,cartao_credito,boleto,vale_alimentacao'],
             'dividir_valor' => ['nullable', 'in:sim,nao'],
             'parcelas' => ['nullable', 'integer', 'min:1', 'max:12'],
+            'id_cliente' => ['nullable', 'integer', 'exists:clientes,id_cliente'],
         ]);
         $validator->sometimes('dividir_valor', 'required', function ($input) {
             return $input->forma_pagamento === 'cartao_credito';
@@ -99,6 +104,8 @@ class CompraFuncionarioController extends Controller
                     'forma_pagamento' => $dados['forma_pagamento'],
                     'dividir_valor' => $dividirValor,
                     'parcelas' => $parcelas,
+                    'status' => 'concluida',
+                    'id_cliente' => $dados['id_cliente'] ?? null,
                 ]);
                 $compra->id_user = $usuario->id_user;
                 $compra->save();
@@ -106,6 +113,26 @@ class CompraFuncionarioController extends Controller
                 foreach ($selecaoLeitor as $idProduto => $quantidadeSelecionada) {
                     $produto = $produtos->get((int) $idProduto);
                     $quantidade = (int) $quantidadeSelecionada;
+                    $valorUnitario = (float) $produto->preco_venda;
+
+                    CompraItem::create([
+                        'id_compra' => $compra->id_compra,
+                        'id_produto' => $produto->id_produto,
+                        'produto_nome' => $produto->nome,
+                        'produto_codigo' => $produto->codigo_barras ?: (string) $produto->id_produto,
+                        'lote' => $produto->lote,
+                        'quantidade' => $quantidade,
+                        'unidade' => $produto->unidade_comercial ?: ($produto->tipo_quantidade === 'caixa' ? 'CX' : 'UN'),
+                        'valor_unitario' => $valorUnitario,
+                        'desconto' => 0,
+                        'valor_total' => $valorUnitario * $quantidade,
+                        'ncm' => $produto->ncm,
+                        'cest' => $produto->cest,
+                        'cfop' => $produto->cfop,
+                        'cst_csosn' => $produto->cst_csosn,
+                        'origem_mercadoria' => $produto->origem_mercadoria,
+                        'gtin' => $produto->codigo_barras,
+                    ]);
 
                     MovimentacaoProduto::create([
                         'id_produto' => $produto->id_produto,

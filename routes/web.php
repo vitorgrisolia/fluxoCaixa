@@ -3,12 +3,15 @@
 use Illuminate\Support\Facades\Route;
 #Controllers
 use App\Http\Controllers\CentroCustoController;
+use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CompraFuncionarioController;
 use App\Http\Controllers\AuditoriaController;
 use App\Http\Controllers\ConfiguracaoController;
 use App\Http\Controllers\ControleFinanceiroController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentoFiscalController;
 use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\EstornoCompraController;
 use App\Http\Controllers\FechamentoCaixaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HistoricoCompraController;
@@ -108,17 +111,27 @@ Route::prefix('leitor-produtos')->middleware(['auth', 'funcionario'])->controlle
 | HISTORICO DE COMPRAS (FUNCIONARIO)
 |--------------------------------------------------------------------------
 */
-Route::prefix('leitor-produtos/historico')->middleware(['auth', 'funcionario'])->controller(HistoricoCompraController::class)
+Route::prefix('leitor-produtos/historico')->middleware(['auth'])->controller(HistoricoCompraController::class)
 ->group(function ()
 {
     Route::get('/', 'index')->name('leitor.historico.index');
-    Route::get('/novo', 'create')->name('leitor.historico.create');
-    Route::get('/editar/{id}', 'edit')->name('leitor.historico.edit');
     Route::get('/mostrar/{id}', 'show')->name('leitor.historico.show');
-    Route::post('/cadastrar', 'store')->name('leitor.historico.store');
-    Route::post('/atualizar/{id}', 'update')->name('leitor.historico.update');
-    Route::post('/deletar/{id}', 'destroy')->name('leitor.historico.destroy');
 });
+
+Route::prefix('cliente')->middleware(['auth', 'admin'])->controller(ClienteController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('cliente.index');
+    Route::get('/novo', 'create')->name('cliente.create');
+    Route::get('/editar/{id}', 'edit')->name('cliente.edit');
+    Route::post('/cadastrar', 'store')->name('cliente.store');
+    Route::post('/atualizar/{id}', 'update')->name('cliente.update');
+    Route::post('/desativar/{id}', 'destroy')->name('cliente.destroy');
+});
+
+Route::post('/compras/{id}/estornar', [EstornoCompraController::class, 'store'])
+    ->middleware(['auth', 'admin'])
+    ->name('compras.estornar');
 
 /*
 |--------------------------------------------------------------------------
@@ -175,7 +188,7 @@ Route::prefix('centro-de-custo')->middleware(['auth', 'admin'])->controller(Cent
     Route::get('/mostrar/{id}', 'show')->     name('centro.show');
     Route::post('/cadastrar', 'store')->      name ('centro.store');
     Route::post('/atualizar/{id}', 'update')->name ('centro.update');
-    Route::get('/deletar/{id}', 'destroy')-> name ('centro.destroy');
+    Route::post('/deletar/{id}', 'destroy')-> name ('centro.destroy');
 });
 /*
 |--------------------------------------------------------------------------
@@ -192,7 +205,7 @@ Route::prefix('lancamento')->middleware(['auth', 'admin'])->controller(Lancament
     Route::get('/mostrar/{id}', 'show')->     name('lancamento.show');
     Route::post('/cadastrar', 'store')->      name ('lancamento.store');
     Route::post('/atualizar/{id}', 'update')->name ('lancamento.update');
-    Route::get('/deletar/{id}', 'destroy')-> name ('lancamento.destroy');
+    Route::post('/deletar/{id}', 'destroy')-> name ('lancamento.destroy');
 });
 /*
 |--------------------------------------------------------------------------
@@ -219,6 +232,14 @@ Route::prefix('configuracoes')->middleware(['auth', 'admin'])->controller(Config
     Route::post('/atualizar', 'update')->name('configuracoes.update');
 });
 
+Route::prefix('documentos-fiscais')->middleware(['auth', 'admin'])->controller(DocumentoFiscalController::class)
+->group(function ()
+{
+    Route::get('/', 'index')->name('documentos-fiscais.index');
+    Route::get('/{id}', 'show')->name('documentos-fiscais.show');
+    Route::post('/solicitar/{idCompra}', 'solicitar')->name('documentos-fiscais.solicitar');
+});
+
 /*
 |--------------------------------------------------------------------------
 | AUDITORIA / LOGS
@@ -241,11 +262,9 @@ Route::prefix('fechamento-caixa')->middleware(['auth'])->controller(FechamentoCa
 {
     Route::get('/', 'index')->name('fechamento-caixa.index');
     Route::get('/novo', 'create')->name('fechamento-caixa.create');
-    Route::get('/editar/{id}', 'edit')->name('fechamento-caixa.edit');
     Route::get('/mostrar/{id}', 'show')->name('fechamento-caixa.show');
     Route::post('/cadastrar', 'store')->name('fechamento-caixa.store');
-    Route::post('/atualizar/{id}', 'update')->name('fechamento-caixa.update');
-    Route::post('/deletar/{id}', 'destroy')->name('fechamento-caixa.destroy');
+    Route::post('/reabrir/{id}', 'reabrir')->middleware('admin')->name('fechamento-caixa.reabrir');
 });
 /*
 |--------------------------------------------------------------------------
